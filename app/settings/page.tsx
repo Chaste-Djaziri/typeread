@@ -4,6 +4,8 @@ import { useState } from "react";
 import type { Settings } from "@/lib/types";
 import { defaultSettings } from "@/lib/types";
 import { loadSettings, saveSettings } from "@/lib/storage";
+import { soundEngine } from "@/lib/engine/audio";
+import Link from "next/link";
 
 export default function SettingsPage() {
   const [s, setS] = useState<Settings>(() => {
@@ -15,124 +17,200 @@ export default function SettingsPage() {
     const next = { ...s, ...patch };
     setS(next);
     saveSettings(next);
+    if (patch.soundFeedback !== undefined) {
+      soundEngine.setEnabled(patch.soundFeedback);
+    }
+    if (patch.soundVolume !== undefined) {
+      soundEngine.setVolume(patch.soundVolume);
+    }
   };
 
   return (
     <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 py-8">
-      <h1 className="text-2xl font-semibold tracking-tight">Settings</h1>
-      <p className="text-sm text-zinc-500 mt-1">Tweak the look of each mode separately. Changes save automatically (local only).</p>
+      <div className="flex items-center justify-between pb-6 border-b border-[#232a3b]">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">Settings</h1>
+          <p className="text-sm text-zinc-400 mt-1">Configure your typing sounds, visual keyboard, and typography.</p>
+        </div>
+        <Link
+          href="/"
+          className="px-4 py-2 rounded-full bg-cyan-500 text-black hover:bg-cyan-400 text-sm font-medium transition-colors"
+        >
+          Back to Reader →
+        </Link>
+      </div>
 
       <div className="mt-8 space-y-6">
-        {/* Typing mode */}
-        <section className="rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-zinc-900 p-5 sm:p-6 space-y-4">
-          <h2 className="font-semibold">Typing Mode</h2>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <label className="space-y-1">
-              <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Font</span>
-              <select
-                value={s.typingFont}
-                onChange={(e) => update({ typingFont: e.target.value as Settings["typingFont"] })}
-                className="w-full rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-900 px-3 py-2 text-sm"
-              >
-                <option value="mono">Mono (Geist Mono)</option>
-                <option value="sans">Sans (Geist)</option>
-                <option value="serif">Serif (Georgia)</option>
-              </select>
-            </label>
-            <label className="space-y-1">
-              <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Size {s.typingFontSize}px</span>
-              <input type="range" min={14} max={28} value={s.typingFontSize} onChange={(e) => update({ typingFontSize: Number(e.target.value) })} className="w-full" />
-            </label>
-            <label className="space-y-1">
-              <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Line height {s.typingLineHeight}</span>
-              <input type="range" min={1.2} max={2.4} step={0.1} value={s.typingLineHeight} onChange={(e) => update({ typingLineHeight: Number(e.target.value) })} className="w-full" />
-            </label>
-            <label className="space-y-1">
-              <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Letter spacing {s.typingLetterSpacing}em</span>
-              <input type="range" min={0} max={0.08} step={0.01} value={s.typingLetterSpacing} onChange={(e) => update({ typingLetterSpacing: Number(e.target.value) })} className="w-full" />
-            </label>
-          </div>
-          <div
-            className="rounded-xl border border-black/5 dark:border-white/10 p-4 bg-zinc-50 dark:bg-zinc-800/50"
-            style={{
-              fontFamily: s.typingFont === "mono" ? "var(--font-geist-mono)" : s.typingFont === "serif" ? "Georgia, serif" : "var(--font-geist-sans)",
-              fontSize: s.typingFontSize,
-              lineHeight: s.typingLineHeight,
-              letterSpacing: `${s.typingLetterSpacing}em`,
-            }}
-          >
-            Preview — The quick brown fox jumps over the lazy dog. こんにちは
+        {/* Sound Feedback */}
+        <section className="rounded-2xl border border-[#232a3b] bg-[#141824] p-5 sm:p-6 space-y-4">
+          <h2 className="font-semibold text-white flex items-center gap-2">
+            <span>Audio & Sound Feedback</span>
+          </h2>
+          <label className="flex items-center gap-3 text-sm text-zinc-300 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={s.soundFeedback}
+              onChange={(e) => {
+                update({ soundFeedback: e.target.checked });
+                if (e.target.checked) soundEngine.playKey(" ");
+              }}
+              className="w-4 h-4 rounded text-cyan-500 accent-cyan-500"
+            />
+            <span>Enable mechanical keyboard click sound feedback on keystrokes</span>
+          </label>
+          <div className="max-w-xs space-y-2">
+            <div className="flex justify-between text-xs text-zinc-400">
+              <span>Volume</span>
+              <span>{Math.round(s.soundVolume * 100)}%</span>
+            </div>
+            <input
+              type="range"
+              min="0"
+              max="1"
+              step="0.05"
+              value={s.soundVolume}
+              onChange={(e) => {
+                const vol = parseFloat(e.target.value);
+                update({ soundVolume: vol });
+                soundEngine.playKey(" ");
+              }}
+              className="w-full accent-cyan-400 cursor-pointer"
+            />
           </div>
         </section>
 
-        {/* Reading mode */}
-        <section className="rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-zinc-900 p-5 sm:p-6 space-y-4">
-          <h2 className="font-semibold">Reading Mode</h2>
-          <div className="grid sm:grid-cols-2 gap-4">
-            <label className="space-y-1">
-              <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Font</span>
-              <select
-                value={s.readingFont}
-                onChange={(e) => update({ readingFont: e.target.value as Settings["readingFont"] })}
-                className="w-full rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-900 px-3 py-2 text-sm"
-              >
-                <option value="serif">Serif (Georgia)</option>
-                <option value="sans">Sans (Geist)</option>
-                <option value="mono">Mono (Geist Mono)</option>
-              </select>
-            </label>
-            <label className="space-y-1">
-              <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Size {s.readingFontSize}px</span>
-              <input type="range" min={14} max={28} value={s.readingFontSize} onChange={(e) => update({ readingFontSize: Number(e.target.value) })} className="w-full" />
-            </label>
-            <label className="space-y-1">
-              <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Line height {s.readingLineHeight}</span>
-              <input type="range" min={1.2} max={2.4} step={0.1} value={s.readingLineHeight} onChange={(e) => update({ readingLineHeight: Number(e.target.value) })} className="w-full" />
-            </label>
-            <label className="space-y-1">
-              <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Letter spacing {s.readingLetterSpacing}em</span>
-              <input type="range" min={0} max={0.08} step={0.01} value={s.readingLetterSpacing} onChange={(e) => update({ readingLetterSpacing: Number(e.target.value) })} className="w-full" />
-            </label>
-          </div>
-          <div
-            className="rounded-xl border border-black/5 dark:border-white/10 p-4 bg-zinc-50 dark:bg-zinc-800/50"
-            style={{
-              fontFamily: s.readingFont === "serif" ? "Georgia, serif" : s.readingFont === "mono" ? "var(--font-geist-mono)" : "var(--font-geist-sans)",
-              fontSize: s.readingFontSize,
-              lineHeight: s.readingLineHeight,
-              letterSpacing: `${s.readingLetterSpacing}em`,
-            }}
-          >
-            Preview — While you are in Reading Mode, you can mark the current paragraph as read by pressing Enter, or click any paragraph.
-          </div>
-        </section>
-
-        {/* Keyboard */}
-        <section className="rounded-2xl border border-black/5 dark:border-white/10 bg-white dark:bg-zinc-900 p-5 sm:p-6 space-y-4">
-          <h2 className="font-semibold">Screen Keyboard (coming soon)</h2>
-          <label className="flex items-center gap-2 text-sm">
-            <input type="checkbox" checked={s.showKeyboard} onChange={(e) => update({ showKeyboard: e.target.checked })} />
-            Show on-screen keyboard in Typing Mode
+        {/* Keyboard Settings */}
+        <section className="rounded-2xl border border-[#232a3b] bg-[#141824] p-5 sm:p-6 space-y-4">
+          <h2 className="font-semibold text-white">On-Screen Visual Keyboard</h2>
+          <label className="flex items-center gap-3 text-sm text-zinc-300 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={s.showKeyboard}
+              onChange={(e) => update({ showKeyboard: e.target.checked })}
+              className="w-4 h-4 rounded text-cyan-500 accent-cyan-500"
+            />
+            <span>Show on-screen visual keyboard in Typing Mode</span>
           </label>
           <label className="space-y-1 block max-w-xs">
-            <span className="text-xs font-medium text-zinc-600 dark:text-zinc-400">Layout</span>
+            <span className="text-xs font-medium text-zinc-400">Keyboard Layout</span>
             <select
               value={s.keyboardLayout}
               onChange={(e) => update({ keyboardLayout: e.target.value as Settings["keyboardLayout"] })}
-              className="w-full rounded-xl border border-black/10 dark:border-white/15 bg-white dark:bg-zinc-900 px-3 py-2 text-sm"
+              className="w-full rounded-xl border border-[#2c344a] bg-[#1a2030] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-400"
             >
               <option value="qwerty">QWERTY</option>
               <option value="qwertz">QWERTZ</option>
               <option value="azerty">AZERTY</option>
             </select>
           </label>
-          <p className="text-xs text-zinc-500">Visual keyboard highlight will appear under the typing area when enabled.</p>
         </section>
 
-        <section className="rounded-2xl border border-dashed border-black/15 dark:border-white/15 p-5 text-sm text-zinc-600 dark:text-zinc-400">
-          <p>
-            All settings are stored locally in your browser. Switch between Typing and Reading modes in the Reader — each uses its own typography.
-          </p>
+        {/* Typing mode typography */}
+        <section className="rounded-2xl border border-[#232a3b] bg-[#141824] p-5 sm:p-6 space-y-4">
+          <h2 className="font-semibold text-white">Typing Mode Typography</h2>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <label className="space-y-1">
+              <span className="text-xs font-medium text-zinc-400">Font</span>
+              <select
+                value={s.typingFont}
+                onChange={(e) => update({ typingFont: e.target.value as Settings["typingFont"] })}
+                className="w-full rounded-xl border border-[#2c344a] bg-[#1a2030] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-400"
+              >
+                <option value="mono">Mono (Geist Mono)</option>
+                <option value="sans">Sans (Geist)</option>
+                <option value="serif">Serif (Georgia)</option>
+              </select>
+            </label>
+            <label className="space-y-1">
+              <span className="text-xs font-medium text-zinc-400">Font size ({s.typingFontSize}px)</span>
+              <input
+                type="range"
+                min="14"
+                max="32"
+                value={s.typingFontSize}
+                onChange={(e) => update({ typingFontSize: Number(e.target.value) })}
+                className="w-full accent-cyan-400"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-xs font-medium text-zinc-400">Line height ({s.typingLineHeight})</span>
+              <input
+                type="range"
+                min="1.2"
+                max="2.5"
+                step="0.1"
+                value={s.typingLineHeight}
+                onChange={(e) => update({ typingLineHeight: Number(e.target.value) })}
+                className="w-full accent-cyan-400"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-xs font-medium text-zinc-400">Letter spacing ({s.typingLetterSpacing}em)</span>
+              <input
+                type="range"
+                min="-0.02"
+                max="0.1"
+                step="0.01"
+                value={s.typingLetterSpacing}
+                onChange={(e) => update({ typingLetterSpacing: Number(e.target.value) })}
+                className="w-full accent-cyan-400"
+              />
+            </label>
+          </div>
+        </section>
+
+        {/* Reading mode typography */}
+        <section className="rounded-2xl border border-[#232a3b] bg-[#141824] p-5 sm:p-6 space-y-4">
+          <h2 className="font-semibold text-white">Reading Mode Typography</h2>
+          <div className="grid sm:grid-cols-2 gap-4">
+            <label className="space-y-1">
+              <span className="text-xs font-medium text-zinc-400">Font</span>
+              <select
+                value={s.readingFont}
+                onChange={(e) => update({ readingFont: e.target.value as Settings["readingFont"] })}
+                className="w-full rounded-xl border border-[#2c344a] bg-[#1a2030] px-3 py-2 text-sm text-white focus:outline-none focus:ring-1 focus:ring-cyan-400"
+              >
+                <option value="serif">Serif (Georgia)</option>
+                <option value="sans">Sans (Geist)</option>
+                <option value="mono">Mono (Geist Mono)</option>
+              </select>
+            </label>
+            <label className="space-y-1">
+              <span className="text-xs font-medium text-zinc-400">Font size ({s.readingFontSize}px)</span>
+              <input
+                type="range"
+                min="14"
+                max="32"
+                value={s.readingFontSize}
+                onChange={(e) => update({ readingFontSize: Number(e.target.value) })}
+                className="w-full accent-cyan-400"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-xs font-medium text-zinc-400">Line height ({s.readingLineHeight})</span>
+              <input
+                type="range"
+                min="1.2"
+                max="2.5"
+                step="0.1"
+                value={s.readingLineHeight}
+                onChange={(e) => update({ readingLineHeight: Number(e.target.value) })}
+                className="w-full accent-cyan-400"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="text-xs font-medium text-zinc-400">Letter spacing ({s.readingLetterSpacing}em)</span>
+              <input
+                type="range"
+                min="-0.02"
+                max="0.1"
+                step="0.01"
+                value={s.readingLetterSpacing}
+                onChange={(e) => update({ readingLetterSpacing: Number(e.target.value) })}
+                className="w-full accent-cyan-400"
+              />
+            </label>
+          </div>
         </section>
       </div>
     </div>

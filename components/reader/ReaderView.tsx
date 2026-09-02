@@ -1,97 +1,178 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useReducer, useState, useCallback } from "react";
-import type { Book, Mode, ParagraphStat, Progress, Settings } from "@/lib/types";
+import { defaultSettings, type Book, type Mode, type ParagraphStat, type Progress, type Settings } from "@/lib/types";
 import { createTypingState, typingReducer, calculateMetrics } from "@/lib/engine/typing-engine";
+import { soundEngine } from "@/lib/engine/audio";
 import { ModeToggle } from "./ModeToggle";
-import { StatsBar } from "./StatsBar";
-import { keyFor, loadProgressMap, saveProgressMap, makeProgress, loadSettings } from "@/lib/storage";
+import { VisualKeyboard } from "./VisualKeyboard";
+import { keyFor, loadProgressMap, saveProgressMap, makeProgress, loadSettings, saveSettings } from "@/lib/storage";
+import { useHydrated } from "@/hooks/useHydrated";
 import Link from "next/link";
 
-function formatMs(ms: number): string {
-  const s = Math.floor(ms / 1000);
-  const m = Math.floor(s / 60);
-  const sec = s % 60;
-  return `${m}:${String(sec).padStart(2, "0")}`;
-}
-
-export function ReaderView({ book }: { book: Book }) {
+export function ReaderView({
+  book,
+  onSwitchBook,
+}: {
+  book: Book;
+  onSwitchBook?: (bookId: string) => void;
+}) {
+  const isHydrated = useHydrated();
   const [mode, setMode] = useState<Mode>("typing");
-  const [settings] = useState<Settings>(() => loadSettings());
-  const [progress, setProgress] = useState<Progress>(() => {
-    if (typeof window === "undefined") return makeProgress(book.id);
+  const [userSettings, setUserSettings] = useState<Settings | null>(null);
+  const [userProgress, setUserProgress] = useState<Progress | null>(null);
+  const [showStatsModal, setShowStatsModal] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showBookModal, setShowBookModal] = useState(false);
+
+  // Active key pressed on physical keyboard (for visual feedback)
+  const [activePhysicalKey, setActivePhysicalKey] = useState<string | null>(null);
+
+  // Chapter slide animation state
+  const [slideDirection, setSlideDirection] = useState<"next" | "prev" | null>(null);
+
+  // Computed settings: default on server, loaded on client
+  const settings = useMemo(() => {
+    if (userSettings) return userSettings;
+    if (!isHydrated) return defaultSettings;
+    return loadSettings();
+  }, [userSettings, isHydrated]);
+
+  const soundEnabled = settings.soundFeedback ?? true;
+  const showKeyboard = settings.showKeyboard ?? true;
+
+  // Computed progress: default on server, loaded on client
+  const progress = useMemo(() => {
+    if (userProgress) return userProgress;
+    if (!isHydrated) return makeProgress(book.id);
     const map = loadProgressMap();
     return map[book.id] ?? makeProgress(book.id);
-  });
+  }, [userProgress, isHydrated, book.id]);
 
-  // sync progress to storage
-  useEffect(() => {
-    const map = loadProgressMap();
-    map[book.id] = progress;
-    saveProgressMap(map);
-  }, [progress, book.id]);
-
-  // flatten chapters for easy nav
-  const flat = useMemo(() => {
-    const arr: { ch: number; p: number; text: string; title: string }[] = [];
-    book.chapters.forEach((c, ci) => c.paragraphs.forEach((t, pi) => arr.push({ ch: ci, p: pi, text: t, title: c.title })));
-    return arr;
-  }, [book]);
-
-  const totalParagraphs = flat.length;
-  const currentFlatIndex = useMemo(() => {
-    const idx = flat.findIndex((f) => f.ch === progress.chapterIndex && f.p === progress.paragraphIndex);
-    return idx >= 0 ? idx : 0;
-  }, [flat, progress.chapterIndex, progress.paragraphIndex]);
-
-  const current = flat[currentFlatIndex];
-  const currentKey = current ? keyFor(current.ch, current.p) : "";
-  const isCompleted = current ? progress.completed.includes(currentKey) || progress.skipped.includes(currentKey) : false;
-
-  // typing state for current paragraph
-  const [typingState, dispatch] = useReducer(typingReducer, current?.text ?? "", createTypingState);
-  const containerRef = useRef<HTMLDivElement>(null);
-
-  // reset typing state when paragraph changes
-  useEffect(() => {
-    if (current) dispatch({ type: "reset", text: current.text });
-    containerRef.current?.focus();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [current?.text]);
-
-  // focus container on mode change
-  useEffect(() => {
-    containerRef.current?.focus();
-  }, [mode]);
-
-  const [now, setNow] = useState(() => Date.now());
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 200);
-    return () => clearInterval(id);
-  }, []);
-  const metrics = useMemo(() => calculateMetrics(typingState, now), [typingState, now]);
-
-  // aggregated stats
-  const agg = useMemo(() => {
-    const stats = Object.values(progress.paragraphStats);
-    const typedStats = stats.filter((s) => s.mode === "typed");
-    const avgWpm = typedStats.length ? Math.round(typedStats.reduce((a, s) => a + s.wpm, 0) / typedStats.length) : metrics.wpm;
-    const avgAcc = typedStats.length ? Math.round(typedStats.reduce((a, s) => a + s.accuracy, 0) / typedStats.length) : metrics.accuracy;
-    const totalTime = progress.totalTimeMs + (typingState.startedAt ? now - typingState.startedAt : 0);
-    return { avgWpm, avgAcc, totalTime, typedCount: typedStats.length };
-  }, [progress, metrics, typingState.startedAt, now]);
-
-  const elapsedMs = typingState.startedAt ? now - typingState.startedAt : 0;
-
-  const goTo = useCallback(
-    (flatIdx: number) => {
-      const item = flat[flatIdx];
-      if (!item) return;
-      setProgress((prev) => ({ ...prev, chapterIndex: item.ch, paragraphIndex: item.p }));
+  const setProgress = useCallback(
+    (updater: Progress | ((prev: Progress) => Progress)) => {
+      setUserProgress((prev) => {
+        const base = prev ?? (isHydrated ? (loadProgressMap()[book.id] ?? makeProgress(book.id)) : makeProgress(book.id));
+        const next = typeof updater === "function" ? updater(base) : updater;
+        if (isHydrated) {
+          const map = loadProgressMap();
+          map[book.id] = next;
+          saveProgressMap(map);
+        }
+        return next;
+      });
     },
-    [flat]
+    [book.id, isHydrated]
   );
 
+  // Sync settings sound engine
+  useEffect(() => {
+    soundEngine.setEnabled(soundEnabled);
+    soundEngine.setVolume(settings.soundVolume ?? 0.35);
+  }, [soundEnabled, settings.soundVolume]);
+
+  const toggleSound = () => {
+    const next = !soundEnabled;
+    soundEngine.setEnabled(next);
+    const newSettings = { ...settings, soundFeedback: next };
+    setUserSettings(newSettings);
+    saveSettings(newSettings);
+  };
+
+  const toggleKeyboard = () => {
+    const next = !showKeyboard;
+    const newSettings = { ...settings, showKeyboard: next };
+    setUserSettings(newSettings);
+    saveSettings(newSettings);
+  };
+
+
+  // Chapter and paragraph indexes
+  const currentChapterIdx = progress.chapterIndex ?? 0;
+  const currentChapter = book.chapters[currentChapterIdx] ?? book.chapters[0];
+  const currentParagraphIdx = progress.paragraphIndex ?? 0;
+
+  // Active paragraph text
+  const activeParagraphText = currentChapter?.paragraphs[currentParagraphIdx] ?? "";
+  const activeKey = keyFor(currentChapterIdx, currentParagraphIdx);
+  const isActiveCompleted =
+    progress.completed.includes(activeKey) || progress.skipped.includes(activeKey);
+
+  // Typing state for active paragraph
+  const [typingState, dispatch] = useReducer(
+    typingReducer,
+    activeParagraphText,
+    createTypingState
+  );
+
+  const containerRef = useRef<HTMLDivElement>(null);
+  const activeParagraphRef = useRef<HTMLDivElement>(null);
+
+  // Reset typing state on paragraph change
+  useEffect(() => {
+    if (activeParagraphText) {
+      dispatch({ type: "reset", text: activeParagraphText });
+    }
+    // Auto-focus typing container
+    containerRef.current?.focus();
+  }, [currentChapterIdx, currentParagraphIdx, activeParagraphText]);
+
+  // Keep active paragraph smoothly scrolled into view
+  useEffect(() => {
+    if (activeParagraphRef.current) {
+      activeParagraphRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "center",
+      });
+    }
+  }, [currentParagraphIdx, currentChapterIdx]);
+
+  // Timer for live stats
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 250);
+    return () => clearInterval(id);
+  }, []);
+
+  const liveMetrics = useMemo(() => {
+    return calculateMetrics(typingState, now);
+  }, [typingState, now]);
+
+  // Aggregated stats for the book
+  const totalBookParagraphs = useMemo(
+    () => book.chapters.reduce((acc, c) => acc + c.paragraphs.length, 0),
+    [book]
+  );
+  const completedCount = progress.completed.length + progress.skipped.length;
+  const progressPercent = totalBookParagraphs
+    ? Math.round((completedCount / totalBookParagraphs) * 100)
+    : 0;
+
+  const aggStats = useMemo(() => {
+    const stats = Object.values(progress.paragraphStats);
+    const typed = stats.filter((s) => s.mode === "typed");
+    const avgWpm = typed.length
+      ? Math.round(typed.reduce((a, s) => a + s.wpm, 0) / typed.length)
+      : liveMetrics.wpm;
+    const avgAcc = typed.length
+      ? Math.round(typed.reduce((a, s) => a + s.accuracy, 0) / typed.length)
+      : liveMetrics.accuracy;
+    return { avgWpm, avgAcc, typedCount: typed.length };
+  }, [progress.paragraphStats, liveMetrics]);
+
+  // Next expected character for the visual keyboard
+  const nextChar = useMemo(() => {
+    if (mode !== "typing" || isActiveCompleted) return null;
+    if (typingState.cursor < typingState.chars.length) {
+      return typingState.chars[typingState.cursor];
+    }
+    if (typingState.completed) {
+      return "\n"; // Next is Enter to finish paragraph
+    }
+    return null;
+  }, [mode, isActiveCompleted, typingState]);
+
+  // Save completed paragraph stat
   const markCompleted = useCallback(
     (key: string, stat: ParagraphStat) => {
       setProgress((prev) => {
@@ -107,58 +188,104 @@ export function ReaderView({ book }: { book: Book }) {
         };
       });
     },
-    []
+    [setProgress]
   );
 
+  // Advance to next paragraph or next chapter
   const advance = useCallback(() => {
-    if (currentFlatIndex + 1 < flat.length) {
-      goTo(currentFlatIndex + 1);
+    if (!currentChapter) return;
+    if (currentParagraphIdx + 1 < currentChapter.paragraphs.length) {
+      // Advance to next paragraph in this chapter
+      setProgress((prev) => ({
+        ...prev,
+        paragraphIndex: currentParagraphIdx + 1,
+      }));
+    } else if (currentChapterIdx + 1 < book.chapters.length) {
+      // Advance to next chapter with slide transition!
+      setSlideDirection("next");
+      setTimeout(() => {
+        setProgress((prev) => ({
+          ...prev,
+          chapterIndex: currentChapterIdx + 1,
+          paragraphIndex: 0,
+        }));
+        setSlideDirection(null);
+      }, 150);
     }
-  }, [currentFlatIndex, flat.length, goTo]);
+  }, [currentChapter, currentParagraphIdx, currentChapterIdx, book.chapters.length, setProgress]);
 
-  // keyboard handling
+  // Chapter slide navigation
+  const goToChapter = useCallback(
+    (targetIdx: number) => {
+      if (targetIdx < 0 || targetIdx >= book.chapters.length) return;
+      setSlideDirection(targetIdx > currentChapterIdx ? "next" : "prev");
+      setTimeout(() => {
+        setProgress((prev) => ({
+          ...prev,
+          chapterIndex: targetIdx,
+          paragraphIndex: 0,
+        }));
+        setSlideDirection(null);
+      }, 150);
+    },
+    [book.chapters.length, currentChapterIdx, setProgress]
+  );
+
+  // Jump directly to a paragraph
+  const jumpToParagraph = useCallback(
+    (pIdx: number) => {
+      setProgress((prev) => ({ ...prev, paragraphIndex: pIdx }));
+      containerRef.current?.focus();
+    },
+    [setProgress]
+  );
+
+  // Physical keyboard handling
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent) => {
-      if (!current) return;
+      if (!currentChapter) return;
 
-      // Tab: restart paragraph (only in typing mode, and paragraph not already finished)
+      setActivePhysicalKey(e.code || e.key);
+
+      // Tab: restart current paragraph
       if (e.key === "Tab") {
         e.preventDefault();
-        if (mode === "typing" && !isCompleted) {
+        soundEngine.playKey("Tab");
+        if (mode === "typing") {
           dispatch({ type: "restart" });
         }
         return;
       }
 
-      // Shift+Enter: mark as read/skip (typing mode spec: "mark a paragraph as read by pressing Shift+Enter. Try it now two times.")
+      // Shift+Enter: skip paragraph / mark as read
       if (e.key === "Enter" && e.shiftKey) {
         e.preventDefault();
-        if (mode === "typing") {
-          const key = keyFor(current.ch, current.p);
-          if (!progress.completed.includes(key) && !progress.skipped.includes(key)) {
-            const stat: ParagraphStat = {
-              wpm: 0,
-              accuracy: 100,
-              errors: 0,
-              timeMs: 0,
-              typedChars: 0,
-              mode: "skipped",
-              timestamp: Date.now(),
-            };
-            markCompleted(key, stat);
-          }
-          advance();
+        soundEngine.playKey("Enter");
+        const k = keyFor(currentChapterIdx, currentParagraphIdx);
+        if (!progress.completed.includes(k) && !progress.skipped.includes(k)) {
+          const stat: ParagraphStat = {
+            wpm: 0,
+            accuracy: 100,
+            errors: 0,
+            timeMs: 0,
+            typedChars: 0,
+            mode: "skipped",
+            timestamp: Date.now(),
+          };
+          markCompleted(k, stat);
         }
+        advance();
         return;
       }
 
-      // Enter handling
+      // Enter key
       if (e.key === "Enter" && !e.shiftKey) {
         e.preventDefault();
+        soundEngine.playKey("Enter");
+
         if (mode === "reading") {
-          // mark current as read
-          const key = keyFor(current.ch, current.p);
-          if (!progress.completed.includes(key) && !progress.skipped.includes(key)) {
+          const k = keyFor(currentChapterIdx, currentParagraphIdx);
+          if (!progress.completed.includes(k) && !progress.skipped.includes(k)) {
             const stat: ParagraphStat = {
               wpm: 0,
               accuracy: 100,
@@ -168,314 +295,622 @@ export function ReaderView({ book }: { book: Book }) {
               mode: "read",
               timestamp: Date.now(),
             };
-            markCompleted(key, stat);
+            markCompleted(k, stat);
           }
           advance();
           return;
         }
+
         if (mode === "typing") {
-          if (typingState.completed) {
-            const m = calculateMetrics(typingState, Date.now());
-            const key = keyFor(current.ch, current.p);
-            const stat: ParagraphStat = {
-              wpm: m.wpm,
-              accuracy: m.accuracy,
-              errors: m.misses,
-              timeMs: m.elapsedMs,
-              typedChars: m.typedChars,
-              mode: "typed",
-              timestamp: Date.now(),
-            };
-            if (!progress.completed.includes(key) && !progress.skipped.includes(key)) {
-              markCompleted(key, stat);
+          if (typingState.completed || isActiveCompleted) {
+            if (!isActiveCompleted) {
+              const m = calculateMetrics(typingState, Date.now());
+              const k = keyFor(currentChapterIdx, currentParagraphIdx);
+              const stat: ParagraphStat = {
+                wpm: m.wpm,
+                accuracy: m.accuracy,
+                errors: m.misses,
+                timeMs: m.elapsedMs,
+                typedChars: m.typedChars,
+                mode: "typed",
+                timestamp: Date.now(),
+              };
+              markCompleted(k, stat);
             }
             advance();
           }
-          // if not completed, Enter does nothing (must fix errors)
           return;
         }
       }
 
-      // Typing mode character input
-      if (mode === "typing" && !isCompleted) {
-        if (e.key === "Backspace") {
+      // Backspace
+      if (e.key === "Backspace") {
+        if (mode === "typing" && !isActiveCompleted) {
           e.preventDefault();
+          soundEngine.playKey("Backspace");
           dispatch({ type: "backspace", ts: Date.now() });
-          return;
         }
-        // Ignore modifiers, arrows, etc.
-        if (e.ctrlKey || e.metaKey || e.altKey) return;
-        if (["Shift", "CapsLock", "Control", "Alt", "Meta", "Dead", "Process"].includes(e.key)) return;
+        return;
+      }
+
+      // Modifier and function keys to ignore
+      if (e.ctrlKey || e.metaKey || e.altKey) return;
+      if (["Shift", "CapsLock", "Control", "Alt", "Meta", "Escape", "ArrowUp", "ArrowDown"].includes(e.key)) return;
+
+      // Arrow navigation between paragraphs
+      if (e.key === "ArrowLeft") {
+        if (currentParagraphIdx > 0) jumpToParagraph(currentParagraphIdx - 1);
+        return;
+      }
+      if (e.key === "ArrowRight") {
+        if (currentParagraphIdx + 1 < currentChapter.paragraphs.length) jumpToParagraph(currentParagraphIdx + 1);
+        return;
+      }
+
+      // Typing input
+      if (mode === "typing" && !isActiveCompleted) {
         if (e.key.length === 1 || e.key === " ") {
-          // This includes Space, punctuation, and for foreign paragraph any key will be "hit" via isForeignChar logic
           e.preventDefault();
+          const expected = typingState.chars[typingState.cursor];
+          const isError = expected !== undefined && e.key !== expected && e.key !== " ";
+          soundEngine.playKey(e.key, isError);
           dispatch({ type: "char", char: e.key, ts: Date.now() });
-          return;
         }
-        // For IME composition, ignore
-        if ((e as unknown as { isComposing?: boolean }).isComposing) return;
       }
     },
-    [current, mode, isCompleted, typingState, progress.completed, progress.skipped, markCompleted, advance]
+    [
+      currentChapter,
+      currentChapterIdx,
+      currentParagraphIdx,
+      mode,
+      isActiveCompleted,
+      typingState,
+      progress.completed,
+      progress.skipped,
+      markCompleted,
+      advance,
+      jumpToParagraph,
+    ]
   );
 
-  if (!current) {
-    return (
-      <div className="flex flex-col items-center justify-center py-24 text-center">
-        <h2 className="text-xl font-semibold">No paragraphs found</h2>
-        <p className="text-sm text-zinc-500">This book appears empty.</p>
-      </div>
-    );
-  }
+  const handleKeyUp = useCallback(() => {
+    setActivePhysicalKey(null);
+  }, []);
 
-  const progressPercent = totalParagraphs ? Math.round(((progress.completed.length + progress.skipped.length) / totalParagraphs) * 100) : 0;
+  // Handle on-screen keyboard click
+  const handleVirtualKeyPress = useCallback(
+    (key: string) => {
+      if (mode !== "typing" || isActiveCompleted) return;
+      if (key === "return") {
+        if (typingState.completed) {
+          soundEngine.playKey("Enter");
+          const m = calculateMetrics(typingState, Date.now());
+          const k = keyFor(currentChapterIdx, currentParagraphIdx);
+          const stat: ParagraphStat = {
+            wpm: m.wpm,
+            accuracy: m.accuracy,
+            errors: m.misses,
+            timeMs: m.elapsedMs,
+            typedChars: m.typedChars,
+            mode: "typed",
+            timestamp: Date.now(),
+          };
+          markCompleted(k, stat);
+          advance();
+        }
+        return;
+      }
+      if (key === "delete") {
+        soundEngine.playKey("Backspace");
+        dispatch({ type: "backspace", ts: Date.now() });
+        return;
+      }
+      if (key.length === 1 || key === " ") {
+        const expected = typingState.chars[typingState.cursor];
+        const isError = expected !== undefined && key !== expected && key !== " ";
+        soundEngine.playKey(key, isError);
+        dispatch({ type: "char", char: key, ts: Date.now() });
+      }
+      containerRef.current?.focus();
+    },
+    [mode, isActiveCompleted, typingState, currentChapterIdx, currentParagraphIdx, markCompleted, advance]
+  );
 
-  // For display: if paragraph completed, show as completed; otherwise show typing overlay
-  const showTypingOverlay = mode === "typing" && !isCompleted;
+  // Status badge (PAUSED / TYPING / READING)
+  const isTypingActive =
+    mode === "typing" && !isActiveCompleted && typingState.startedAt && !typingState.completed;
+  const statusLabel = mode === "reading" ? "READING" : isTypingActive ? "TYPING" : "PAUSED";
 
-  // Chapter header for current
-  const chapterTitle = book.chapters[current.ch]?.title ?? "";
+  // Active WPM & Acc
+  const displayWpm =
+    mode === "typing" && isTypingActive
+      ? liveMetrics.wpm
+      : aggStats.avgWpm > 0
+      ? aggStats.avgWpm
+      : "-";
+  const displayAcc =
+    mode === "typing" && isTypingActive
+      ? liveMetrics.accuracy
+      : aggStats.avgAcc > 0
+      ? aggStats.avgAcc
+      : "-";
 
   return (
-    <div className="w-full max-w-3xl mx-auto flex flex-col min-h-[70vh]">
-      {/* Top bar */}
-      <div className="sticky top-0 z-10 -mx-4 sm:mx-0 px-4 sm:px-0 py-3 bg-white/80 dark:bg-black/80 backdrop-blur border-b border-black/5 dark:border-white/10 flex items-center justify-between gap-3">
-        <ModeToggle mode={mode} onChange={setMode} />
-        <StatsBar
-          wpm={mode === "typing" && !isCompleted ? metrics.wpm : agg.avgWpm}
-          accuracy={mode === "typing" && !isCompleted ? metrics.accuracy : agg.avgAcc}
-          progress={`${progress.completed.length + progress.skipped.length} / ${totalParagraphs}`}
-          progressPercent={progressPercent}
-          elapsedLabel={mode === "typing" && !isCompleted ? formatMs(elapsedMs) : formatMs(agg.totalTime)}
-        />
-        <Link href="/settings" className="p-2 rounded-full border border-black/10 dark:border-white/15 hover:bg-zinc-50 dark:hover:bg-zinc-900" aria-label="Settings">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7">
-            <path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z" />
-            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 9 15a1.65 1.65 0 0 0-1-1.51V13a1.65 1.65 0 0 0 1-1.51A1.65 1.65 0 0 0 9 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 13.5 4a1.65 1.65 0 0 0 1 1.51V6a2 2 0 0 1 4 0v.49a1.65 1.65 0 0 0 1 1.51c.6.26 1.3.1 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1 1.51V13a1.65 1.65 0 0 0-1 1.51Z" />
-          </svg>
-        </Link>
-      </div>
+    <div
+      ref={containerRef}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}
+      onKeyUp={handleKeyUp}
+      className="outline-none min-h-screen flex flex-col bg-[#0e1118] text-[#e6edf3] select-none selection:bg-cyan-500/30 selection:text-white relative"
+      aria-label="Book reader and touch typing practice"
+    >
+      {/* 1. TOP BAR matching the screenshot */}
+      <header className="sticky top-0 z-30 backdrop-blur-md bg-[#0e1118]/90 border-b border-[#1c2333]">
+        <div className="w-full px-4 sm:px-8 h-12 flex items-center justify-between gap-2">
+          {/* Breadcrumb: Book Title / Chapter Title */}
+          <div className="flex items-center gap-2 overflow-hidden text-xs sm:text-sm">
+            <button
+              onClick={() => setShowBookModal(true)}
+              className="text-cyan-400 italic hover:text-cyan-300 transition-colors truncate font-medium cursor-pointer"
+              title="Click to switch book"
+            >
+              {book.title}
+            </button>
+            <span className="text-zinc-600 italic">/</span>
+            <span className="text-zinc-300 font-medium truncate">
+              {currentChapter?.title ?? `Chapter ${currentChapterIdx + 1}`}
+            </span>
+          </div>
 
-      {/* Progress thin bar */}
-      <div className="h-1 bg-black/5 dark:bg-white/10 w-full">
-        <div className="h-full bg-black dark:bg-white transition-all" style={{ width: `${progressPercent}%` }} />
-      </div>
+          {/* Right badges & toggle */}
+          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
+            {/* PAUSED / TYPING badge */}
+            <span
+              className={`px-2.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wider uppercase border transition-colors ${
+                statusLabel === "PAUSED"
+                  ? "bg-[#251b0f] text-[#f59e0b] border-[#92400e]/80"
+                  : statusLabel === "TYPING"
+                  ? "bg-[#0c2918] text-emerald-400 border-emerald-600/80 animate-pulse"
+                  : "bg-[#112433] text-cyan-400 border-cyan-600/80"
+              }`}
+            >
+              {statusLabel}
+            </span>
 
-      {/* Chapter label */}
-      <div className="mt-6 mb-2">
-        <p className="text-xs font-semibold tracking-widest uppercase text-zinc-500">{chapterTitle}</p>
-      </div>
+            {/* % Done pill */}
+            <span className="px-2.5 py-0.5 rounded text-[11px] font-mono bg-[#161a25] text-zinc-300 border border-[#252c3e]">
+              {progressPercent}% done
+            </span>
 
-      {/* Main typing/reading area */}
-      <div
-        ref={containerRef}
-        tabIndex={0}
-        onKeyDown={handleKeyDown}
-        className="outline-none focus-visible:ring-2 focus-visible:ring-black/10 dark:focus-visible:ring-white/20 rounded-xl p-4 sm:p-6 bg-white dark:bg-zinc-900 border border-black/5 dark:border-white/10 min-h-[280px] flex flex-col justify-center"
-        aria-label={mode === "typing" ? "Typing area" : "Reading area"}
-      >
-        {/* Hint bar */}
-        <div className="mb-4 flex flex-wrap gap-2 text-[11px] leading-none">
-          {mode === "typing" && !isCompleted && (
-            <>
-              <span className="px-2 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 font-mono">
-                Enter <span className="text-zinc-500">finish</span>
-              </span>
-              <span className="px-2 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 font-mono">
-                Tab <span className="text-zinc-500">restart</span>
-              </span>
-              <span className="px-2 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 font-mono">
-                Shift+Enter <span className="text-zinc-500">skip</span>
-              </span>
-            </>
-          )}
-          {mode === "reading" && (
-            <>
-              <span className="px-2 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 font-mono">
-                Enter <span className="text-zinc-500">mark read</span>
-              </span>
-              <span className="px-2 py-1 rounded-full bg-zinc-100 dark:bg-zinc-800 font-mono">
-                Click <span className="text-zinc-500">jump</span>
-              </span>
-            </>
-          )}
-          {isCompleted && <span className="px-2 py-1 rounded-full bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-xs">Completed — timer paused. Press Enter for next.</span>}
+            {/* WPM pill */}
+            <span className="px-2.5 py-0.5 rounded text-[11px] font-mono bg-[#161a25] text-zinc-300 border border-[#252c3e]">
+              {displayWpm} wpm
+            </span>
+
+            {/* Acc pill */}
+            <span className="px-2.5 py-0.5 rounded text-[11px] font-mono bg-[#161a25] text-zinc-300 border border-[#252c3e]">
+              {displayAcc}
+              {typeof displayAcc === "number" ? "%" : ""} acc
+            </span>
+
+            {/* Green Switch Toggle matching screenshot */}
+            <ModeToggle mode={mode} onChange={setMode} />
+          </div>
         </div>
 
-        {showTypingOverlay ? (
+        {/* Thin glowing progress line across the top edge */}
+        <div className="h-[2px] w-full bg-[#181f2f] overflow-hidden">
           <div
-            className="leading-relaxed break-words whitespace-pre-wrap select-none"
-            style={{
-              fontFamily: settings.typingFont === "mono" ? "var(--font-geist-mono)" : settings.typingFont === "serif" ? "Georgia, serif" : "var(--font-geist-sans)",
-              fontSize: settings.typingFontSize,
-              lineHeight: settings.typingLineHeight,
-              letterSpacing: `${settings.typingLetterSpacing}em`,
-            }}
+            className="h-full bg-gradient-to-r from-teal-400 via-cyan-400 to-indigo-500 shadow-[0_0_8px_rgba(45,212,191,0.7)] transition-all duration-300"
+            style={{ width: `${progressPercent}%` }}
+          />
+        </div>
+      </header>
+
+      {/* 2. MAIN CONTAINER WITH LEFT TOOLBAR AND MULTI-PARAGRAPH VIEW */}
+      <div className="flex-1 w-full flex relative px-2 sm:px-6 py-6 sm:py-8 max-w-6xl mx-auto">
+        {/* Left Floating Utility Dock */}
+        <aside className="hidden md:flex flex-col items-center gap-4 fixed left-4 top-28 z-20">
+          {/* Sound / Volume button */}
+          <button
+            type="button"
+            onClick={toggleSound}
+            title={soundEnabled ? "Mechanical sound click enabled (click to mute)" : "Sound muted (click to enable)"}
+            className={`p-2 rounded-xl border transition-all ${
+              soundEnabled
+                ? "bg-[#102a1d] text-emerald-400 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                : "bg-[#151924] text-zinc-500 border-[#242c3d] hover:text-zinc-300"
+            }`}
           >
-            {typingState.chars.map((ch, idx) => {
-              const state = typingState.display[idx];
-              const isCursor = idx === typingState.cursor;
-              let cls = "";
-              if (state === "pending") cls = "text-zinc-400 dark:text-zinc-500";
-              else if (state === "correct" || state === "corrected" || state === "foreign") cls = "text-black dark:text-white bg-green-50 dark:bg-green-950/30";
-              else if (state === "incorrect") cls = "text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-950/30 underline decoration-red-500 decoration-2";
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+              {soundEnabled && (
+                <>
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+                </>
+              )}
+            </svg>
+          </button>
+
+          {/* On-screen visual keyboard toggle */}
+          <button
+            type="button"
+            onClick={toggleKeyboard}
+            title={showKeyboard ? "Hide on-screen keyboard" : "Show on-screen keyboard"}
+            className={`p-2 rounded-xl border transition-all ${
+              showKeyboard
+                ? "bg-[#102a1d] text-emerald-400 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
+                : "bg-[#151924] text-zinc-500 border-[#242c3d] hover:text-zinc-300"
+            }`}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <rect x="2" y="4" width="20" height="16" rx="2" />
+              <line x1="6" y1="8" x2="6" y2="8" />
+              <line x1="10" y1="8" x2="10" y2="8" />
+              <line x1="14" y1="8" x2="14" y2="8" />
+              <line x1="18" y1="8" x2="18" y2="8" />
+              <line x1="6" y1="12" x2="6" y2="12" />
+              <line x1="18" y1="12" x2="18" y2="12" />
+              <line x1="7" y1="16" x2="17" y2="16" />
+            </svg>
+          </button>
+
+          {/* Volume quick slider / audio toggle icon */}
+          <button
+            type="button"
+            onClick={() => soundEngine.playKey(" ")}
+            title="Test mechanical keypress click"
+            className="p-2 rounded-xl border bg-[#151924] text-zinc-400 border-[#242c3d] hover:text-cyan-300 hover:border-cyan-500/40 transition-all"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
+            </svg>
+          </button>
+
+          {/* Crown / Stats button */}
+          <button
+            type="button"
+            onClick={() => setShowStatsModal(true)}
+            title="View typing performance stats"
+            className="p-2 rounded-xl border bg-[#151924] text-amber-400/80 border-[#242c3d] hover:text-amber-300 hover:border-amber-500/40 transition-all"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5z" />
+            </svg>
+          </button>
+
+          {/* Help / Shortcuts button */}
+          <button
+            type="button"
+            onClick={() => setShowHelpModal(true)}
+            title="Keyboard shortcuts & instructions"
+            className="p-2 rounded-xl border bg-[#151924] text-zinc-400 border-[#242c3d] hover:text-cyan-300 hover:border-cyan-500/40 transition-all"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </button>
+        </aside>
+
+        {/* 3. MULTI-PARAGRAPH TYPING CANVAS */}
+        <main className="flex-1 w-full max-w-4xl mx-auto flex flex-col items-center">
+          {/* Centered Chapter Header with Slide Controls */}
+          <div className="w-full flex items-center justify-between my-6 px-4">
+            <button
+              onClick={() => goToChapter(currentChapterIdx - 1)}
+              disabled={currentChapterIdx <= 0}
+              className="px-2.5 py-1 text-xs text-zinc-500 hover:text-cyan-300 disabled:opacity-20 disabled:pointer-events-none transition-colors"
+              title="Previous chapter"
+            >
+              ← Prev
+            </button>
+            <h1 className="text-sm sm:text-base font-medium tracking-wide text-zinc-400">
+              {currentChapter?.title ?? "Chapter"}
+            </h1>
+            <button
+              onClick={() => goToChapter(currentChapterIdx + 1)}
+              disabled={currentChapterIdx >= book.chapters.length - 1}
+              className="px-2.5 py-1 text-xs text-zinc-500 hover:text-cyan-300 disabled:opacity-20 disabled:pointer-events-none transition-colors"
+              title="Next chapter"
+            >
+              Next →
+            </button>
+          </div>
+
+          {/* Multi-Paragraph Container with Slide Transition */}
+          <div
+            className={`w-full flex flex-col gap-8 sm:gap-10 pb-64 transition-all ${
+              slideDirection === "next" ? "slide-next" : slideDirection === "prev" ? "slide-prev" : ""
+            }`}
+          >
+            {currentChapter?.paragraphs.map((paraText, pIdx) => {
+              const k = keyFor(currentChapterIdx, pIdx);
+              const isCompletedPara =
+                progress.completed.includes(k) || progress.skipped.includes(k);
+              const isActivePara = pIdx === currentParagraphIdx;
+              const pStat = progress.paragraphStats[k];
+
               return (
-                <span key={idx} className={`${cls} ${isCursor ? "ring-1 ring-black/20 dark:ring-white/30" : ""} rounded-[2px] px-[1px]`}>
-                  {ch}
-                  {isCursor && <span className="inline-block w-[2px] h-[1.1em] bg-black dark:bg-white align-[-0.15em] ml-[1px] animate-pulse" />}
-                </span>
+                <div
+                  key={k}
+                  ref={isActivePara ? activeParagraphRef : undefined}
+                  onClick={() => {
+                    if (!isActivePara) jumpToParagraph(pIdx);
+                  }}
+                  className={`group relative flex items-start w-full transition-opacity cursor-pointer ${
+                    isActivePara
+                      ? "opacity-100"
+                      : isCompletedPara
+                      ? "opacity-90 hover:opacity-100"
+                      : "opacity-45 hover:opacity-75"
+                  }`}
+                >
+                  {/* Left Gutter: Stats (e.g. Ω 37 97) matching reference */}
+                  <div className="w-16 sm:w-24 shrink-0 text-right pr-3 sm:pr-5 flex items-center justify-end gap-1.5 font-mono text-[11px] sm:text-xs pt-1 select-none">
+                    {pStat && pStat.mode === "typed" ? (
+                      <span className="inline-flex items-center gap-1.5 text-cyan-400/90 font-medium">
+                        <span className="text-zinc-500 font-serif text-[11px]">Ω</span>
+                        <span>{pStat.wpm}</span>
+                        <span className="text-zinc-400 font-normal">{pStat.accuracy}</span>
+                      </span>
+                    ) : pStat?.mode === "read" || pStat?.mode === "skipped" ? (
+                      <span className="text-zinc-500 text-[10px]">✓</span>
+                    ) : isActivePara ? (
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee] animate-ping" />
+                    ) : null}
+                  </div>
+
+                  {/* Paragraph Content */}
+                  <div
+                    className="flex-1 font-mono text-base sm:text-[18px] leading-[1.8] sm:leading-[1.9] tracking-[0.02em] break-words whitespace-pre-wrap"
+                    style={{
+                      fontFamily:
+                        settings.typingFont === "mono"
+                          ? "var(--font-geist-mono), monospace"
+                          : settings.typingFont === "serif"
+                          ? "Georgia, serif"
+                          : "var(--font-geist-sans), sans-serif",
+                    }}
+                  >
+                    {isActivePara && mode === "typing" && !isCompletedPara ? (
+                      // Live typing view with character-by-character coloring & cursor
+                      <div className="inline">
+                        {typingState.chars.map((char, cIdx) => {
+                          const state = typingState.display[cIdx];
+                          const isCursor = cIdx === typingState.cursor;
+
+                          let charClass = "text-[#8d9ab5]"; // pending character color
+                          if (state === "correct" || state === "corrected" || state === "foreign") {
+                            charClass = "text-[#ffffff] font-medium"; // typed correctly
+                          } else if (state === "incorrect") {
+                            charClass =
+                              "text-red-400 bg-red-950/60 underline decoration-red-500 decoration-2"; // typo
+                          }
+
+                          return (
+                            <span key={cIdx} className="relative inline">
+                              {isCursor && (
+                                <span className="inline-block w-[2px] sm:w-[2.5px] h-[1.15em] bg-[#f59e0b] shadow-[0_0_8px_#f59e0b] align-[-0.15em] mr-[-2px] animate-caret z-10" />
+                              )}
+                              <span className={charClass}>{char}</span>
+                            </span>
+                          );
+                        })}
+
+                        {/* Cursor at the end of text */}
+                        {typingState.cursor === typingState.chars.length && (
+                          <span className="inline-block w-[2px] sm:w-[2.5px] h-[1.15em] bg-[#f59e0b] shadow-[0_0_8px_#f59e0b] align-[-0.15em] ml-[1px] animate-caret z-10" />
+                        )}
+
+                        {/* Return symbol ↵ at end of active paragraph */}
+                        <span
+                          className={`ml-1 text-sm font-sans transition-colors ${
+                            typingState.completed
+                              ? "text-cyan-400 font-bold animate-pulse"
+                              : "text-zinc-600"
+                          }`}
+                          title="Press Enter to finish paragraph"
+                        >
+                          ↵
+                        </span>
+                      </div>
+                    ) : (
+                      // Completed or Upcoming Paragraph View
+                      <div className="inline">
+                        <span
+                          className={
+                            isCompletedPara
+                              ? "text-[#d6dfed]"
+                              : isActivePara
+                              ? "text-white font-medium"
+                              : "text-[#58647c]"
+                          }
+                        >
+                          {paraText}
+                        </span>
+
+                        {/* Return symbol ↵ at end of paragraph */}
+                        <span className="ml-1 text-sm font-sans text-zinc-600">
+                          ↵
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               );
             })}
-            {typingState.cursor === typingState.chars.length && typingState.completed && (
-              <span className="ml-1 text-green-600 dark:text-green-400 text-sm font-mono">✓ Press Enter</span>
-            )}
           </div>
-        ) : (
-          // Completed view or reading mode preview of current paragraph
-          <p
-            className="leading-relaxed whitespace-pre-wrap"
-            style={{
-              fontFamily: mode === "typing" ? (settings.typingFont === "mono" ? "var(--font-geist-mono)" : settings.typingFont === "serif" ? "Georgia, serif" : "var(--font-geist-sans)") : settings.readingFont === "serif" ? "Georgia, serif" : "var(--font-geist-sans)",
-              fontSize: mode === "typing" ? settings.typingFontSize : settings.readingFontSize,
-              lineHeight: mode === "typing" ? settings.typingLineHeight : settings.readingLineHeight,
-              letterSpacing: `${mode === "typing" ? settings.typingLetterSpacing : settings.readingLetterSpacing}em`,
-            }}
-          >
-            {current.text}
-            {isCompleted && <span className="ml-2 text-xs font-mono text-green-600">✓</span>}
-          </p>
-        )}
 
-        {!showTypingOverlay && (
-          <div className="mt-4 flex gap-2">
-            <button
-              onClick={() => advance()}
-              className="px-4 py-2 rounded-full bg-black text-white dark:bg-white dark:text-black text-sm font-medium"
-            >
-              Next paragraph →
-            </button>
-            {mode === "typing" && (
+          {/* 4. ON-SCREEN VISUAL KEYBOARD AT THE BOTTOM */}
+          {showKeyboard && mode === "typing" && (
+            <div className="w-full sticky bottom-3 z-20 pt-4 pb-2">
+              <VisualKeyboard
+                activeKey={activePhysicalKey}
+                nextChar={nextChar}
+                onKeyPress={handleVirtualKeyPress}
+              />
+            </div>
+          )}
+        </main>
+      </div>
+
+      {/* MODAL 1: STATS DRAWER / MODAL */}
+      {showStatsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-[#141824] border border-[#232a3b] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-[#232a3b] pb-3">
+              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                <span>🏆</span> Typing Statistics
+              </h2>
               <button
-                onClick={() => {
-                  // if typing mode but paragraph completed, allow re-type? Reset to allow re-typing?
-                  // Remove completion to allow retype
-                  const k = keyFor(current.ch, current.p);
-                  setProgress((prev) => ({
-                    ...prev,
-                    completed: prev.completed.filter((x) => x !== k),
-                    skipped: prev.skipped.filter((x) => x !== k),
-                    paragraphStats: Object.fromEntries(Object.entries(prev.paragraphStats).filter(([kk]) => kk !== k)),
-                  }));
-                  // will show typing overlay after state update via isCompleted false
-                }}
-                className="px-3 py-2 rounded-full border border-black/10 dark:border-white/15 text-sm"
+                onClick={() => setShowStatsModal(false)}
+                className="text-zinc-400 hover:text-white text-sm"
               >
-                Retype
+                ✕
               </button>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* Paragraph list / chapter navigation */}
-      <div className="mt-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-sm font-semibold">Chapter progress</h3>
-          <span className="text-xs text-zinc-500">
-            {progress.completed.length + progress.skipped.length} / {totalParagraphs} completed
-          </span>
-        </div>
-
-        <div className="space-y-6">
-          {book.chapters.map((ch, ci) => {
-            const chParagraphs = ch.paragraphs.map((_, pi) => {
-              const k = keyFor(ci, pi);
-              const globalIdx = flat.findIndex((f) => f.ch === ci && f.p === pi);
-              const isActive = ci === current.ch && pi === current.p;
-              const done = progress.completed.includes(k) || progress.skipped.includes(k);
-              const stat = progress.paragraphStats[k];
-              return { k, pi, globalIdx, isActive, done, stat, text: ch.paragraphs[pi] };
-            });
-            const chDone = chParagraphs.filter((p) => p.done).length;
-            return (
-              <div key={ch.id} className="rounded-xl border border-black/5 dark:border-white/10 bg-white dark:bg-zinc-900 overflow-hidden">
-                <div className="px-4 py-3 flex items-center justify-between bg-zinc-50 dark:bg-zinc-800/50 border-b border-black/5 dark:border-white/10">
-                  <p className="text-sm font-semibold">{ch.title}</p>
-                  <span className="text-xs font-mono text-zinc-500">
-                    {chDone} / {ch.paragraphs.length}
-                  </span>
-                </div>
-                <div className="divide-y divide-black/[0.04] dark:divide-white/[0.06]">
-                  {chParagraphs.map(({ k, pi, globalIdx, isActive, done, stat, text }) => (
-                    <button
-                      key={k}
-                      onClick={() => goTo(globalIdx)}
-                      className={`w-full text-left px-4 py-3 flex gap-3 items-start hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors ${isActive ? "bg-amber-50 dark:bg-amber-950/20 ring-inset ring-1 ring-amber-200 dark:ring-amber-800" : ""}`}
-                    >
-                      <span
-                        className={`mt-1 shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-mono border ${
-                          done
-                            ? stat?.mode === "typed"
-                              ? "bg-green-500 text-white border-green-600"
-                              : "bg-zinc-400 text-white border-zinc-500"
-                            : isActive
-                            ? "bg-black text-white dark:bg-white dark:text-black border-black dark:border-white"
-                            : "bg-white dark:bg-zinc-900 border-black/10 dark:border-white/15 text-zinc-500"
-                        }`}
-                      >
-                        {done ? "✓" : pi + 1}
-                      </span>
-                      <span className={`text-sm leading-relaxed line-clamp-2 ${done ? "text-zinc-500" : isActive ? "text-black dark:text-white font-medium" : "text-zinc-700 dark:text-zinc-300"}`}>{text}</span>
-                      {stat && (
-                        <span className="ml-auto hidden sm:inline-flex flex-col items-end text-[11px] font-mono shrink-0">
-                          <span className={stat.mode === "typed" ? "text-zinc-700 dark:text-zinc-300" : "text-zinc-400"}>
-                            {stat.mode === "typed" ? `${stat.wpm} WPM · ${stat.accuracy}%` : stat.mode === "skipped" ? "skipped" : "read"}
-                          </span>
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3 font-mono text-center">
+              <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47]">
+                <p className="text-xs text-zinc-400">Average WPM</p>
+                <p className="text-2xl font-bold text-cyan-400 mt-1">{aggStats.avgWpm}</p>
               </div>
-            );
-          })}
+              <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47]">
+                <p className="text-xs text-zinc-400">Accuracy</p>
+                <p className="text-2xl font-bold text-emerald-400 mt-1">{aggStats.avgAcc}%</p>
+              </div>
+              <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47]">
+                <p className="text-xs text-zinc-400">Completed</p>
+                <p className="text-2xl font-bold text-white mt-1">
+                  {completedCount} / {totalBookParagraphs}
+                </p>
+              </div>
+              <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47]">
+                <p className="text-xs text-zinc-400">Progress</p>
+                <p className="text-2xl font-bold text-purple-400 mt-1">{progressPercent}%</p>
+              </div>
+            </div>
+            <div className="flex justify-end pt-2">
+              <button
+                onClick={() => setShowStatsModal(false)}
+                className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-medium rounded-full text-xs"
+              >
+                Done
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
+      )}
 
-      {/* Book-level stats */}
-      <div className="mt-8 grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-xl border border-black/5 dark:border-white/10 bg-white dark:bg-zinc-900 p-4">
-          <p className="text-xs text-zinc-500">Avg WPM (typed)</p>
-          <p className="text-xl font-mono font-semibold">{agg.avgWpm}</p>
+      {/* MODAL 2: HELP / SHORTCUTS MODAL */}
+      {showHelpModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-[#141824] border border-[#232a3b] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#232a3b] pb-3">
+              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+                <span>💡</span> Keyboard Shortcuts
+              </h2>
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="text-zinc-400 hover:text-white text-sm"
+              >
+                ✕
+              </button>
+            </div>
+            <ul className="space-y-2.5 text-sm text-zinc-300">
+              <li className="flex items-center justify-between">
+                <span>Finish paragraph & advance</span>
+                <kbd className="px-2 py-1 bg-[#232a3b] rounded text-xs font-mono text-cyan-300">Enter</kbd>
+              </li>
+              <li className="flex items-center justify-between">
+                <span>Restart current paragraph</span>
+                <kbd className="px-2 py-1 bg-[#232a3b] rounded text-xs font-mono text-cyan-300">Tab</kbd>
+              </li>
+              <li className="flex items-center justify-between">
+                <span>Skip paragraph without typing</span>
+                <kbd className="px-2 py-1 bg-[#232a3b] rounded text-xs font-mono text-cyan-300">Shift + Enter</kbd>
+              </li>
+              <li className="flex items-center justify-between">
+                <span>Jump directly to any paragraph</span>
+                <span className="text-xs text-zinc-400">Click paragraph</span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span>Switch between Typing and Reading mode</span>
+                <span className="text-xs text-zinc-400">Top-right toggle</span>
+              </li>
+            </ul>
+            <div className="flex justify-end pt-3">
+              <button
+                onClick={() => setShowHelpModal(false)}
+                className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-medium rounded-full text-xs"
+              >
+                Got it
+              </button>
+            </div>
+          </div>
         </div>
-        <div className="rounded-xl border border-black/5 dark:border-white/10 bg-white dark:bg-zinc-900 p-4">
-          <p className="text-xs text-zinc-500">Avg Accuracy</p>
-          <p className="text-xl font-mono font-semibold">{agg.avgAcc}%</p>
-        </div>
-        <div className="rounded-xl border border-black/5 dark:border-white/10 bg-white dark:bg-zinc-900 p-4">
-          <p className="text-xs text-zinc-500">Time</p>
-          <p className="text-xl font-mono font-semibold">{formatMs(agg.totalTime)}</p>
-        </div>
-        <div className="rounded-xl border border-black/5 dark:border-white/10 bg-white dark:bg-zinc-900 p-4">
-          <p className="text-xs text-zinc-500">Progress</p>
-          <p className="text-xl font-mono font-semibold">{progressPercent}%</p>
-        </div>
-      </div>
+      )}
 
-      {/* Nav */}
-      <div className="mt-6 flex gap-2">
-        <Link href="/books" className="px-4 py-2 rounded-full border border-black/10 dark:border-white/15 text-sm">
-          ← Books
-        </Link>
-        <Link href="/settings" className="px-4 py-2 rounded-full border border-black/10 dark:border-white/15 text-sm">
-          Settings
-        </Link>
-        {currentFlatIndex === totalParagraphs - 1 && isCompleted && (
-          <Link href="/books" className="ml-auto px-4 py-2 rounded-full bg-black text-white dark:bg-white dark:text-black text-sm font-medium">
-            Finish chapter →
-          </Link>
-        )}
-      </div>
+      {/* MODAL 3: BOOK SWITCHER MODAL */}
+      {showBookModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+          <div className="bg-[#141824] border border-[#232a3b] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-[#232a3b] pb-3">
+              <h2 className="text-lg font-semibold text-white">Library</h2>
+              <button
+                onClick={() => setShowBookModal(false)}
+                className="text-zinc-400 hover:text-white text-sm"
+              >
+                ✕
+              </button>
+            </div>
+            <p className="text-xs text-zinc-400">
+              Select a book to read or upload your own files (EPUB, PDF, TXT, MD).
+            </p>
+            <div className="flex flex-col gap-2 pt-2 max-h-60 overflow-y-auto">
+              <button
+                type="button"
+                onClick={() => {
+                  onSwitchBook?.("demo");
+                  setShowBookModal(false);
+                }}
+                className={`w-full text-left px-4 py-2.5 rounded-xl border text-sm transition-colors ${
+                  book.id === "demo"
+                    ? "bg-[#1f283d] text-cyan-300 border-cyan-500/50"
+                    : "bg-[#1d2436] hover:bg-[#252e45] text-zinc-200 border-[#2d3852]"
+                }`}
+              >
+                Welcome to TypeRead (Tutorial)
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onSwitchBook?.("upload");
+                  setShowBookModal(false);
+                }}
+                className="w-full text-center px-4 py-2.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-sm font-medium transition-colors"
+              >
+                + Upload New Book
+              </button>
+              <Link
+                href="/books"
+                className="w-full text-center px-4 py-2.5 rounded-xl bg-[#1d2436] hover:bg-[#252e45] text-zinc-300 text-sm font-medium border border-[#2d3852] transition-colors"
+              >
+                Manage All Books →
+              </Link>
+              <Link
+                href="/settings"
+                className="w-full text-center px-4 py-2.5 rounded-xl bg-[#1d2436] hover:bg-[#252e45] text-zinc-400 text-sm font-medium border border-[#2d3852] transition-colors"
+              >
+                Settings & Typography →
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

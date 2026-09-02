@@ -51,6 +51,8 @@ export type Settings = {
   readingLetterSpacing: number;
   showKeyboard: boolean;
   keyboardLayout: "qwerty" | "qwertz" | "azerty";
+  soundFeedback: boolean;
+  soundVolume: number;
   theme: "light" | "dark" | "sepia" | "auto";
 };
 
@@ -63,9 +65,11 @@ export const defaultSettings: Settings = {
   readingLineHeight: 1.7,
   typingLetterSpacing: 0.02,
   readingLetterSpacing: 0.01,
-  showKeyboard: false,
+  showKeyboard: true,
   keyboardLayout: "qwerty",
-  theme: "auto",
+  soundFeedback: true,
+  soundVolume: 0.35,
+  theme: "dark",
 };
 
 export type CharState = "pending" | "correct" | "incorrect" | "corrected" | "foreign";
@@ -80,6 +84,5 @@ export type TypingState = {
   errorCount: number;
   startedAt: number | null;
   completed: boolean;
-  // for timer pausing
   paused: boolean;
 };

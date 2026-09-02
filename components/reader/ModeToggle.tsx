@@ -3,30 +3,44 @@
 import type { Mode } from "@/lib/types";
 
 export function ModeToggle({ mode, onChange }: { mode: Mode; onChange: (m: Mode) => void }) {
+  const isTyping = mode === "typing";
+
   return (
-    <div className="inline-flex rounded-full border border-black/10 dark:border-white/15 p-1 bg-white dark:bg-zinc-900 shadow-sm">
+    <div className="relative group">
       <button
-        onClick={() => onChange("typing")}
-        className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-          mode === "typing"
-            ? "bg-black text-white dark:bg-white dark:text-black shadow"
-            : "text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white"
+        onClick={() => onChange(isTyping ? "reading" : "typing")}
+        className={`relative flex items-center justify-between w-14 h-7 px-1 rounded-full transition-colors border ${
+          isTyping
+            ? "bg-[#183d28] border-emerald-500/60"
+            : "bg-[#1e293b] border-cyan-500/60"
         }`}
-        aria-pressed={mode === "typing"}
+        aria-label={isTyping ? "Switch to reading mode" : "Switch to typing mode"}
+        title={isTyping ? "Click to switch to reading mode" : "Click to switch to typing mode"}
       >
-        Typing
+        {/* Keyboard icon */}
+        <span className={`text-[11px] leading-none transition-opacity ${isTyping ? "opacity-100 text-emerald-300" : "opacity-40 text-zinc-400"}`}>
+          ⌨️
+        </span>
+
+        {/* Book icon */}
+        <span className={`text-[11px] leading-none transition-opacity ${!isTyping ? "opacity-100 text-cyan-300" : "opacity-40 text-zinc-400"}`}>
+          📖
+        </span>
+
+        {/* Sliding dot */}
+        <span
+          className={`absolute top-0.5 bottom-0.5 w-6 rounded-full transition-transform duration-200 flex items-center justify-center shadow-md ${
+            isTyping
+              ? "left-0.5 translate-x-0 bg-emerald-400"
+              : "left-0.5 translate-x-7 bg-cyan-400"
+          }`}
+        />
       </button>
-      <button
-        onClick={() => onChange("reading")}
-        className={`px-4 py-1.5 rounded-full text-sm font-medium transition-colors ${
-          mode === "reading"
-            ? "bg-black text-white dark:bg-white dark:text-black shadow"
-            : "text-zinc-600 dark:text-zinc-400 hover:text-black dark:hover:text-white"
-        }`}
-        aria-pressed={mode === "reading"}
-      >
-        Reading
-      </button>
+
+      {/* Tooltip matching screenshot */}
+      <div className="absolute right-0 top-full mt-2 hidden group-hover:block z-50 whitespace-nowrap px-2.5 py-1 text-[11px] font-mono rounded bg-[#161a25] text-zinc-200 border border-[#2b3347] shadow-xl pointer-events-none">
+        {isTyping ? "Click to switch to reading mode" : "Click to switch to typing mode"}
+      </div>
     </div>
   );
 }
