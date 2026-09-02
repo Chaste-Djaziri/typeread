@@ -24,6 +24,7 @@ export function ReaderView({
   const [showStatsModal, setShowStatsModal] = useState(false);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showBookModal, setShowBookModal] = useState(false);
+  const [showCompletionModal, setShowCompletionModal] = useState(false);
 
   // Active key pressed on physical keyboard (for visual feedback)
   const [activePhysicalKey, setActivePhysicalKey] = useState<string | null>(null);
@@ -211,6 +212,9 @@ export function ReaderView({
         }));
         setSlideDirection(null);
       }, 150);
+    } else {
+      // Completed all chapters and paragraphs in the book!
+      setShowCompletionModal(true);
     }
   }, [currentChapter, currentParagraphIdx, currentChapterIdx, book.chapters.length, setProgress]);
 
@@ -447,8 +451,16 @@ export function ReaderView({
       {/* 1. TOP BAR matching the screenshot */}
       <header className="sticky top-0 z-30 backdrop-blur-md bg-[#0e1118]/90 border-b border-[#1c2333]">
         <div className="w-full px-4 sm:px-8 h-12 flex items-center justify-between gap-2">
-          {/* Breadcrumb: Book Title / Chapter Title */}
-          <div className="flex items-center gap-2 overflow-hidden text-xs sm:text-sm">
+          {/* Breadcrumb: Catalog Link + Book Title / Chapter Title */}
+          <div className="flex items-center gap-2 sm:gap-2.5 overflow-hidden text-xs sm:text-sm">
+            <Link
+              href="/"
+              className="px-2.5 py-1 rounded-full bg-[#161a25] hover:bg-[#202738] text-zinc-300 hover:text-white border border-[#262e40] text-[11px] sm:text-xs font-medium flex items-center gap-1.5 transition-colors shrink-0"
+              title="Return to Book Catalog"
+            >
+              <span>←</span>
+              <span>Catalog</span>
+            </Link>
             <button
               onClick={() => setShowBookModal(true)}
               className="text-cyan-400 italic hover:text-cyan-300 transition-colors truncate font-medium cursor-pointer"
@@ -907,6 +919,61 @@ export function ReaderView({
               >
                 Settings & Typography →
               </Link>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 4: BOOK COMPLETED CELEBRATION MODAL */}
+      {showCompletionModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="bg-[#141824] border border-cyan-500/40 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl text-center space-y-6 relative overflow-hidden">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-400 to-emerald-400 text-black flex items-center justify-center text-3xl mx-auto shadow-lg shadow-cyan-500/20">
+              🎉
+            </div>
+            <div>
+              <span className="text-[11px] font-mono uppercase tracking-widest text-emerald-400 font-bold px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-700/50 inline-block mb-2">
+                Book Finished!
+              </span>
+              <h2 className="text-2xl font-bold text-white tracking-tight">
+                {book.title}
+              </h2>
+              <p className="text-xs sm:text-sm text-zinc-400 mt-2">
+                Congratulations! You typed through all {book.chapters.length} chapter{book.chapters.length !== 1 ? "s" : ""} and completed the entire book.
+              </p>
+            </div>
+
+            {/* Performance Stats */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 font-mono text-center pt-2">
+              <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47]">
+                <p className="text-[10px] uppercase text-zinc-500">Average WPM</p>
+                <p className="text-2xl font-bold text-cyan-400 mt-0.5">{aggStats.avgWpm || liveMetrics.wpm || "-"}</p>
+              </div>
+              <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47]">
+                <p className="text-[10px] uppercase text-zinc-500">Accuracy</p>
+                <p className="text-2xl font-bold text-emerald-400 mt-0.5">{aggStats.avgAcc}%</p>
+              </div>
+              <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47] col-span-2 sm:col-span-1">
+                <p className="text-[10px] uppercase text-zinc-500">Paragraphs</p>
+                <p className="text-2xl font-bold text-white mt-0.5">{totalBookParagraphs}</p>
+              </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+              <Link
+                href="/"
+                className="w-full sm:w-auto flex-1 px-6 py-3 rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-black font-bold text-sm transition-all shadow-lg shadow-cyan-500/20"
+              >
+                Find Other Books in Catalog →
+              </Link>
+              <button
+                type="button"
+                onClick={() => setShowCompletionModal(false)}
+                className="w-full sm:w-auto px-4 py-3 rounded-full border border-[#2d3852] text-zinc-400 hover:text-white text-xs font-medium transition-colors"
+              >
+                Stay Here
+              </button>
             </div>
           </div>
         </div>
