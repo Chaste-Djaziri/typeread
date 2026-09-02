@@ -237,6 +237,77 @@ export default function CatalogPage() {
             );
           })}
         </div>
+
+        {/* Recommended EPUB Sources Section */}
+        <section className="mt-12 rounded-3xl border border-[#232a3b] bg-[#141824] p-6 sm:p-8 space-y-5">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <span className="text-[10px] font-mono uppercase tracking-widest text-emerald-400 font-bold px-2.5 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-800/40">
+                Recommended Resources
+              </span>
+              <h2 className="text-xl font-bold text-white tracking-tight mt-2">
+                Where to Get Free Books (EPUB format recommended)
+              </h2>
+            </div>
+            <p className="text-xs text-zinc-400 max-w-md">
+              Download any book in <code className="text-cyan-300 font-mono">.epub</code> format and click <span className="text-white font-medium">+ Upload Book</span> above to start typing.
+            </p>
+          </div>
+
+          <div className="grid sm:grid-cols-2 gap-4 pt-2">
+            {/* Source 1: Z-Library */}
+            <a
+              href="https://z-library.sk/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group p-5 rounded-2xl border border-[#262f44] bg-[#171d2c] hover:bg-[#1c2438] hover:border-cyan-500/50 transition-all flex flex-col justify-between gap-3 shadow-md"
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-base text-white group-hover:text-cyan-300 transition-colors flex items-center gap-1.5">
+                    <span>Z-Library</span>
+                    <span className="text-xs text-zinc-500 group-hover:text-cyan-400 transition-colors">↗</span>
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-950/80 text-cyan-300 border border-cyan-800/50">
+                    Millions of Books
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
+                  One of the largest free online shadow libraries. Offers extensive collections of fiction, non-fiction, academic literature, and bestsellers with direct EPUB download.
+                </p>
+              </div>
+              <div className="text-[11px] font-mono text-cyan-400 group-hover:underline">
+                Visit z-library.sk →
+              </div>
+            </a>
+
+            {/* Source 2: DigiLibraries */}
+            <a
+              href="https://digilibraries.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="group p-5 rounded-2xl border border-[#262f44] bg-[#171d2c] hover:bg-[#1c2438] hover:border-emerald-500/50 transition-all flex flex-col justify-between gap-3 shadow-md"
+            >
+              <div>
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-base text-white group-hover:text-emerald-300 transition-colors flex items-center gap-1.5">
+                    <span>DigiLibraries</span>
+                    <span className="text-xs text-zinc-500 group-hover:text-emerald-400 transition-colors">↗</span>
+                  </h3>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-300 border border-emerald-800/50">
+                    Free Digital Library
+                  </span>
+                </div>
+                <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
+                  Free digital source of eBooks across dozens of genres including classics, history, poetry, and arts. Clean and direct downloads in EPUB and PDF formats.
+                </p>
+              </div>
+              <div className="text-[11px] font-mono text-emerald-400 group-hover:underline">
+                Visit digilibraries.com →
+              </div>
+            </a>
+          </div>
+        </section>
       </main>
 
       {/* 4. UPLOAD MODAL */}
@@ -257,6 +328,31 @@ export default function CatalogPage() {
             <p className="text-xs text-zinc-400">
               Upload EPUB, PDF, TXT, or Markdown files. Your books stay 100% local on your device.
             </p>
+
+            {/* Quick links to download EPUBs */}
+            <div className="p-3 bg-[#171d2c] border border-[#252f44] rounded-xl text-xs text-zinc-300 flex items-center justify-between gap-2">
+              <span className="text-zinc-400">Need free EPUB books?</span>
+              <div className="flex items-center gap-2 font-mono text-[11px]">
+                <a
+                  href="https://z-library.sk/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-cyan-400 hover:underline"
+                >
+                  Z-Library ↗
+                </a>
+                <span className="text-zinc-600">·</span>
+                <a
+                  href="https://digilibraries.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-emerald-400 hover:underline"
+                >
+                  DigiLibraries ↗
+                </a>
+              </div>
+            </div>
+
             <UploadDropzone onBookImported={handleImported} />
           </div>
         </div>
