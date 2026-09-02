@@ -6,6 +6,7 @@ import { createTypingState, typingReducer, calculateMetrics } from "@/lib/engine
 import { soundEngine } from "@/lib/engine/audio";
 import { ModeToggle } from "./ModeToggle";
 import { VisualKeyboard } from "./VisualKeyboard";
+import { ChapterTransitionModal } from "./ChapterTransitionModal";
 import { keyFor, loadProgressMap, saveProgressMap, makeProgress, loadSettings, saveSettings } from "@/lib/storage";
 import { useHydrated } from "@/hooks/useHydrated";
 import Link from "next/link";
@@ -25,6 +26,11 @@ export function ReaderView({
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showBookModal, setShowBookModal] = useState(false);
   const [showCompletionModal, setShowCompletionModal] = useState(false);
+
+  // Inter-chapter transition screen state
+  const [showChapterTransition, setShowChapterTransition] = useState(false);
+  const [transitionCompletedChapter, setTransitionCompletedChapter] = useState(0);
+  const [transitionNextChapter, setTransitionNextChapter] = useState(1);
 
   // Active key pressed on physical keyboard (for visual feedback)
   const [activePhysicalKey, setActivePhysicalKey] = useState<string | null>(null);
@@ -202,21 +208,29 @@ export function ReaderView({
         paragraphIndex: currentParagraphIdx + 1,
       }));
     } else if (currentChapterIdx + 1 < book.chapters.length) {
-      // Advance to next chapter with slide transition!
-      setSlideDirection("next");
-      setTimeout(() => {
-        setProgress((prev) => ({
-          ...prev,
-          chapterIndex: currentChapterIdx + 1,
-          paragraphIndex: 0,
-        }));
-        setSlideDirection(null);
-      }, 150);
+      // Show chapter completion stats modal before moving to next chapter!
+      setTransitionCompletedChapter(currentChapterIdx);
+      setTransitionNextChapter(currentChapterIdx + 1);
+      setShowChapterTransition(true);
     } else {
       // Completed all chapters and paragraphs in the book!
       setShowCompletionModal(true);
     }
   }, [currentChapter, currentParagraphIdx, currentChapterIdx, book.chapters.length, setProgress]);
+
+  // Handle continue from chapter transition modal
+  const handleContinueChapter = useCallback(() => {
+    setShowChapterTransition(false);
+    setSlideDirection("next");
+    setTimeout(() => {
+      setProgress((prev) => ({
+        ...prev,
+        chapterIndex: transitionNextChapter,
+        paragraphIndex: 0,
+      }));
+      setSlideDirection(null);
+    }, 150);
+  }, [transitionNextChapter, setProgress]);
 
   // Chapter slide navigation
   const goToChapter = useCallback(
@@ -978,6 +992,21 @@ export function ReaderView({
           </div>
         </div>
       )}
+
+      {/* MODAL 5: CHAPTER TRANSITION & STATS MODAL */}
+      <ChapterTransitionModal
+        isOpen={showChapterTransition}
+        book={book}
+        completedChapterIdx={transitionCompletedChapter}
+        nextChapterIdx={transitionNextChapter}
+        progress={progress}
+        onContinue={handleContinueChapter}
+        onOpenContents={() => {
+          setShowChapterTransition(false);
+          setShowBookModal(true);
+        }}
+        onClose={() => setShowChapterTransition(false)}
+      />
     </div>
   );
 }
