@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useReducer, useState, useCallback } from "react";
 import type { Book, Mode, ParagraphStat, Progress, Settings } from "@/lib/types";
-import { createTypingState, typingReducer, calculateMetrics, isForeignChar } from "@/lib/engine/typing-engine";
+import { createTypingState, typingReducer, calculateMetrics } from "@/lib/engine/typing-engine";
 import { ModeToggle } from "./ModeToggle";
 import { StatsBar } from "./StatsBar";
 import { keyFor, loadProgressMap, saveProgressMap, makeProgress, loadSettings } from "@/lib/storage";
@@ -174,46 +174,24 @@ export function ReaderView({ book }: { book: Book }) {
           return;
         }
         if (mode === "typing") {
-          // finish paragraph only if completed (all chars typed correctly)
-          if (typingState.completed || isForeignChar(current.text.slice(-1))) {
-            // Actually need typingState.completed check; allow Enter to complete
-            if (typingState.completed) {
-              const m = calculateMetrics(typingState, Date.now());
-              const key = keyFor(current.ch, current.p);
-              const stat: ParagraphStat = {
-                wpm: m.wpm,
-                accuracy: m.accuracy,
-                errors: m.misses,
-                timeMs: m.elapsedMs,
-                typedChars: m.typedChars,
-                mode: "typed",
-                timestamp: Date.now(),
-              };
-              if (!progress.completed.includes(key) && !progress.skipped.includes(key)) {
-                markCompleted(key, stat);
-              }
-              advance();
-            }
-            // if not completed, Enter does nothing (must fix errors)
-          } else {
-            // Require correction: shake hint? do nothing
-            // Could optionally require exact complete
-            if (typingState.completed) {
-              const m = calculateMetrics(typingState, Date.now());
-              const key = keyFor(current.ch, current.p);
-              const stat: ParagraphStat = {
-                wpm: m.wpm,
-                accuracy: m.accuracy,
-                errors: m.misses,
-                timeMs: m.elapsedMs,
-                typedChars: m.typedChars,
-                mode: "typed",
-                timestamp: Date.now(),
-              };
+          if (typingState.completed) {
+            const m = calculateMetrics(typingState, Date.now());
+            const key = keyFor(current.ch, current.p);
+            const stat: ParagraphStat = {
+              wpm: m.wpm,
+              accuracy: m.accuracy,
+              errors: m.misses,
+              timeMs: m.elapsedMs,
+              typedChars: m.typedChars,
+              mode: "typed",
+              timestamp: Date.now(),
+            };
+            if (!progress.completed.includes(key) && !progress.skipped.includes(key)) {
               markCompleted(key, stat);
-              advance();
             }
+            advance();
           }
+          // if not completed, Enter does nothing (must fix errors)
           return;
         }
       }
