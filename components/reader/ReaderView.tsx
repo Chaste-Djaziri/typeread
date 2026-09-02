@@ -50,28 +50,26 @@ export function ReaderView({ book }: { book: Book }) {
 
   // typing state for current paragraph
   const [typingState, dispatch] = useReducer(typingReducer, current?.text ?? "", createTypingState);
-  const [tick, setTick] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // reset typing state when paragraph changes
   useEffect(() => {
     if (current) dispatch({ type: "reset", text: current.text });
     containerRef.current?.focus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [current?.text]);
-
-  // timer tick while typing
-  useEffect(() => {
-    if (mode !== "typing" || !typingState.startedAt || typingState.completed || isCompleted) return;
-    const id = setInterval(() => setTick((x) => x + 1), 200);
-    return () => clearInterval(id);
-  }, [mode, typingState.startedAt, typingState.completed, isCompleted]);
 
   // focus container on mode change
   useEffect(() => {
     containerRef.current?.focus();
   }, [mode]);
 
-  const metrics = useMemo(() => calculateMetrics(typingState, Date.now()), [typingState, tick]);
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 200);
+    return () => clearInterval(id);
+  }, []);
+  const metrics = useMemo(() => calculateMetrics(typingState, now), [typingState, now]);
 
   // aggregated stats
   const agg = useMemo(() => {
@@ -79,11 +77,11 @@ export function ReaderView({ book }: { book: Book }) {
     const typedStats = stats.filter((s) => s.mode === "typed");
     const avgWpm = typedStats.length ? Math.round(typedStats.reduce((a, s) => a + s.wpm, 0) / typedStats.length) : metrics.wpm;
     const avgAcc = typedStats.length ? Math.round(typedStats.reduce((a, s) => a + s.accuracy, 0) / typedStats.length) : metrics.accuracy;
-    const totalTime = progress.totalTimeMs + (typingState.startedAt ? Date.now() - typingState.startedAt : 0);
+    const totalTime = progress.totalTimeMs + (typingState.startedAt ? now - typingState.startedAt : 0);
     return { avgWpm, avgAcc, totalTime, typedCount: typedStats.length };
-  }, [progress, metrics, typingState.startedAt]);
+  }, [progress, metrics, typingState.startedAt, now]);
 
-  const elapsedMs = typingState.startedAt ? Date.now() - typingState.startedAt : 0;
+  const elapsedMs = typingState.startedAt ? now - typingState.startedAt : 0;
 
   const goTo = useCallback(
     (flatIdx: number) => {
@@ -237,7 +235,7 @@ export function ReaderView({ book }: { book: Book }) {
           return;
         }
         // For IME composition, ignore
-        if ((e as any).isComposing) return;
+        if ((e as unknown as { isComposing?: boolean }).isComposing) return;
       }
     },
     [current, mode, isCompleted, typingState, progress.completed, progress.skipped, markCompleted, advance]

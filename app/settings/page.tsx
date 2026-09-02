@@ -1,16 +1,15 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Settings } from "@/lib/types";
 import { defaultSettings } from "@/lib/types";
 import { loadSettings, saveSettings } from "@/lib/storage";
 
 export default function SettingsPage() {
-  const [s, setS] = useState<Settings>(defaultSettings);
-
-  useEffect(() => {
-    setS(loadSettings());
-  }, []);
+  const [s, setS] = useState<Settings>(() => {
+    if (typeof window === "undefined") return defaultSettings;
+    return loadSettings();
+  });
 
   const update = (patch: Partial<Settings>) => {
     const next = { ...s, ...patch };

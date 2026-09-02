@@ -1,17 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import type { Book } from "@/lib/types";
 import { loadBooks, saveBooks, loadProgressMap, saveProgressMap } from "@/lib/storage";
-import { demoBook, getTotalParagraphs } from "@/lib/demo-book";
+import { getTotalParagraphs } from "@/lib/demo-book";
 import Link from "next/link";
 
 export default function BooksPage() {
-  const [books, setBooks] = useState<Book[]>([]);
-
-  useEffect(() => {
-    setBooks(loadBooks());
-  }, []);
+  const [books, setBooks] = useState<Book[]>(() => {
+    if (typeof window === "undefined") return [];
+    return loadBooks();
+  });
 
   const remove = (id: string) => {
     if (id === "demo") return;
@@ -55,8 +54,8 @@ export default function BooksPage() {
               <p className="text-xs font-mono text-zinc-500">{done} / {total} · {pct}%</p>
               <div className="mt-auto flex gap-2 pt-2">
                 <Link
-                  href={`/?book=${b.id}`}
-                  onClick={(e) => {
+                  href="/"
+                  onClick={() => {
                     // we use main page selector; just navigate home
                   }}
                   className="flex-1 text-center px-3 py-2 rounded-full bg-black text-white dark:bg-white dark:text-black text-sm font-medium"

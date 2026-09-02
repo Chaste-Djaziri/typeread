@@ -50,7 +50,6 @@ export function typingReducer(state: TypingState, action: TypingAction): TypingS
       if (state.cursor === 0) return state;
       const cursor = state.cursor - 1;
       const display = [...state.display];
-      const prev = display[cursor];
       // if was incorrect, decrement errorCount visually but keep firstAttempts
       // display goes back to pending
       display[cursor] = "pending";

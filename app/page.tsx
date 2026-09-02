@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { ReaderView } from "@/components/reader/ReaderView";
 import { UploadDropzone } from "@/components/reader/UploadDropzone";
 import type { Book } from "@/lib/types";
@@ -9,18 +9,14 @@ import { loadBooks, saveBooks } from "@/lib/storage";
 import Link from "next/link";
 
 export default function Home() {
-  const [books, setBooks] = useState<Book[]>([demoBook]);
+  const [books, setBooks] = useState<Book[]>(() => {
+    if (typeof window === "undefined") return [demoBook];
+    const loaded = loadBooks();
+    if (!loaded.find((b) => b.id === "demo")) return [demoBook, ...loaded];
+    return loaded;
+  });
   const [activeId, setActiveId] = useState<string>("demo");
   const [showUpload, setShowUpload] = useState(false);
-
-  useEffect(() => {
-    const loaded = loadBooks();
-    setBooks(loaded);
-    // keep demo as default if not set
-    if (!loaded.find((b) => b.id === "demo")) {
-      setBooks([demoBook, ...loaded]);
-    }
-  }, []);
 
   const activeBook = books.find((b) => b.id === activeId) ?? demoBook;
 

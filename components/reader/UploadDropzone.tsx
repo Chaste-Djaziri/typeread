@@ -61,8 +61,9 @@ export function UploadDropzone({ onBookImported }: Props) {
           throw new Error("No text found in file");
         }
         onBookImported(book);
-      } catch (e: any) {
-        setError(e?.message ?? "Failed to parse file");
+      } catch (e: unknown) {
+        const msg = e instanceof Error ? e.message : "Failed to parse file";
+        setError(msg);
       } finally {
         setLoading(false);
         setProgress(null);
