@@ -464,11 +464,11 @@ export function ReaderView({
     >
       {/* 1. TOP BAR matching the screenshot */}
       <header className="sticky top-0 z-30 backdrop-blur-md bg-white/90 border-b border-slate-200 shadow-sm">
-        <div className="w-full px-4 sm:px-8 h-12 flex items-center justify-between gap-2">
+        <div className="w-full px-4 sm:px-8 h-16 flex items-center justify-between gap-2">
           {/* Breadcrumb: Logo + Catalog Link + Book Title / Chapter Title */}
           <div className="flex items-center gap-2 sm:gap-2.5 overflow-hidden text-xs sm:text-sm">
             <Link href="/" className="shrink-0 flex items-center" title="TypeRead – Book Catalog">
-              <img src="/typeread-logo.png" alt="TypeRead logo" className="h-9 sm:h-10 w-auto object-contain" />
+              <img src="/typeread-logo.png" alt="TypeRead logo" className="h-12 sm:h-14 w-auto object-contain" />
             </Link>
             <Link
               href="/"
