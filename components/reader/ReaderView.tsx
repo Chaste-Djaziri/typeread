@@ -462,67 +462,86 @@ export function ReaderView({
       className="outline-none min-h-screen flex flex-col bg-white text-slate-900 select-none selection:bg-cyan-100 selection:text-cyan-900 relative"
       aria-label="Book reader and touch typing practice"
     >
-      {/* 1. TOP BAR matching the screenshot */}
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-white/90 border-b border-slate-200 shadow-sm">
-        <div className="w-full px-4 sm:px-8 h-16 flex items-center justify-between gap-2">
-          {/* Breadcrumb: Logo + Catalog Link + Book Title / Chapter Title */}
-          <div className="flex items-center gap-2 sm:gap-2.5 overflow-hidden text-xs sm:text-sm">
-            <Link href="/" className="shrink-0 flex items-center" title="TypeRead – Book Catalog">
-              <img src="/typeread-logo.png" alt="TypeRead logo" className="h-12 sm:h-14 w-auto object-contain" />
+      {/* 1. PROFESSIONAL TOP BAR */}
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 border-b border-slate-200 shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          {/* Left: Brand + Breadcrumb */}
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <Link href="/" className="shrink-0 flex items-center" title="TypeRead – Home">
+              <img src="/typeread-logo.png" alt="TypeRead logo" className="h-9 sm:h-10 w-auto object-contain" />
             </Link>
-            <Link
-              href="/"
-              className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 text-[11px] sm:text-xs font-medium flex items-center gap-1.5 transition-colors shrink-0"
-              title="Return to Book Catalog"
-            >
-              <span>←</span>
-              <span>Catalog</span>
-            </Link>
-            <button
-              onClick={() => setShowBookModal(true)}
-              className="text-cyan-600 italic hover:text-cyan-700 transition-colors truncate font-medium cursor-pointer"
-              title="Click to switch book"
-            >
-              {book.title}
-            </button>
-            <span className="text-slate-400 italic">/</span>
-            <span className="text-slate-700 font-medium truncate">
-              {currentChapter?.title ?? `Chapter ${currentChapterIdx + 1}`}
-            </span>
+            <span className="hidden sm:block w-px h-6 bg-slate-200" aria-hidden="true" />
+            <nav className="hidden sm:flex items-center gap-1.5 min-w-0 text-sm" aria-label="Breadcrumb">
+              <Link
+                href="/"
+                className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium transition-colors shrink-0"
+                title="Return to Book Catalog"
+              >
+                <span>←</span>
+                <span>Catalog</span>
+              </Link>
+              <span className="text-slate-300" aria-hidden="true">›</span>
+              <button
+                onClick={() => setShowBookModal(true)}
+                className="hidden sm:inline-flex items-center text-sm font-medium text-slate-600 hover:text-slate-900 truncate max-w-[160px] lg:max-w-[220px] transition-colors"
+                title="Click to switch book"
+              >
+                <span className="truncate">{book.title}</span>
+              </button>
+              <span className="hidden sm:inline text-slate-300" aria-hidden="true">›</span>
+              <span className="text-sm font-semibold text-slate-900 truncate max-w-[160px] lg:max-w-[220px]">
+                {currentChapter?.title ?? `Chapter ${currentChapterIdx + 1}`}
+              </span>
+            </nav>
+            {/* Mobile breadcrumb */}
+            <div className="sm:hidden flex items-center gap-1.5 min-w-0 text-xs">
+              <span className="text-slate-700 font-medium truncate max-w-[120px]">{currentChapter?.title ?? `Chapter ${currentChapterIdx + 1}`}</span>
+            </div>
           </div>
 
-          {/* Right badges & toggle */}
-          <div className="flex items-center gap-2 sm:gap-2.5 shrink-0">
-            {/* PAUSED / TYPING badge */}
-            <span
-              className={`px-2.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wider uppercase border transition-colors ${
-                statusLabel === "PAUSED"
-                  ? "bg-amber-50 text-amber-700 border-amber-200"
-                  : statusLabel === "TYPING"
-                  ? "bg-emerald-50 text-emerald-700 border-emerald-300 animate-pulse"
-                  : "bg-cyan-50 text-cyan-700 border-cyan-200"
-              }`}
-            >
-              {statusLabel}
-            </span>
-
-            {/* % Done pill */}
-            <span className="px-2.5 py-0.5 rounded text-[11px] font-mono bg-slate-100 text-slate-600 border border-slate-200">
-              {progressPercent}% done
-            </span>
-
-            {/* WPM pill */}
-            <span className="px-2.5 py-0.5 rounded text-[11px] font-mono bg-slate-100 text-slate-600 border border-slate-200">
-              {displayWpm} wpm
-            </span>
-
-            {/* Acc pill */}
-            <span className="px-2.5 py-0.5 rounded text-[11px] font-mono bg-slate-100 text-slate-600 border border-slate-200">
-              {displayAcc}
-              {typeof displayAcc === "number" ? "%" : ""} acc
-            </span>
-
-            {/* Green Switch Toggle matching screenshot */}
+          {/* Right: Professional stats group + toggle */}
+          <div className="flex items-center gap-3 shrink-0">
+            <div className="hidden lg:flex items-center gap-1.5">
+              <span
+                className={`px-2.5 py-1 rounded-full text-[11px] font-bold tracking-wider uppercase border transition-colors ${
+                  statusLabel === "PAUSED"
+                    ? "bg-amber-50 text-amber-700 border-amber-200"
+                    : statusLabel === "TYPING"
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-300 animate-pulse"
+                    : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                }`}
+              >
+                {statusLabel}
+              </span>
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-mono bg-slate-100 text-slate-600 border border-slate-200">
+                {progressPercent}% done
+              </span>
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-mono bg-slate-100 text-slate-600 border border-slate-200">
+                {displayWpm} wpm
+              </span>
+              <span className="px-2.5 py-1 rounded-full text-[11px] font-mono bg-slate-100 text-slate-600 border border-slate-200">
+                {displayAcc}
+                {typeof displayAcc === "number" ? "%" : ""} acc
+              </span>
+            </div>
+            {/* Mobile condensed stats */}
+            <div className="flex lg:hidden items-center gap-1.5">
+              <span
+                className={`px-2 py-0.5 rounded-full text-[10px] font-bold tracking-wider uppercase border ${
+                  statusLabel === "PAUSED"
+                    ? "bg-amber-50 text-amber-700 border-amber-200"
+                    : statusLabel === "TYPING"
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-300"
+                    : "bg-cyan-50 text-cyan-700 border-cyan-200"
+                }`}
+              >
+                {statusLabel.charAt(0)}
+              </span>
+              <span className="px-2 py-0.5 rounded-full text-[11px] font-mono bg-slate-100 text-slate-600 border border-slate-200">
+                {progressPercent}%
+              </span>
+            </div>
+            <div className="hidden sm:block w-px h-6 bg-slate-200" aria-hidden="true" />
             <ModeToggle mode={mode} onChange={setMode} />
           </div>
         </div>
