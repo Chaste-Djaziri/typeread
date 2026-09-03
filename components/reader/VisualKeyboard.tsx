@@ -160,7 +160,7 @@ export function VisualKeyboard({ activeKey, nextChar, onKeyPress, className = ""
 
   return (
     <div
-      className={`select-none mx-auto p-2 sm:p-3 rounded-2xl bg-[#12151f]/95 border border-[#23293a] shadow-2xl backdrop-blur-md max-w-[680px] w-full ${className}`}
+      className={`select-none mx-auto p-2 sm:p-3 rounded-2xl bg-white border border-slate-200 shadow-xl backdrop-blur-md max-w-[680px] w-full ${className}`}
       aria-label="On-screen visual keyboard"
     >
       <div className="flex flex-col gap-1 sm:gap-1.5 w-full">
@@ -196,10 +196,10 @@ export function VisualKeyboard({ activeKey, nextChar, onKeyPress, className = ""
                     border 
                     ${
                       isPressed
-                        ? "bg-[#2e374f] text-emerald-400 border-emerald-400 shadow-[0_0_12px_rgba(52,211,153,0.35)] scale-[0.96] translate-y-0.5"
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-400 shadow-sm scale-[0.96] translate-y-0.5"
                         : isTarget
-                        ? "bg-[#1f283d] text-cyan-200 border-cyan-400/80 shadow-[0_0_8px_rgba(34,211,238,0.25)] ring-1 ring-cyan-400/50"
-                        : "bg-[#181d2a] text-[#8e9bb5] hover:text-[#d3dcf0] border-[#262c3e] hover:bg-[#1d2334] shadow-[0_2px_0_#0d1017]"
+                        ? "bg-cyan-50 text-cyan-700 border-cyan-400 shadow-sm ring-1 ring-cyan-300"
+                        : "bg-slate-50 text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-white shadow-sm"
                     }
                   `}
                 >
@@ -210,18 +210,18 @@ export function VisualKeyboard({ activeKey, nextChar, onKeyPress, className = ""
                     </span>
                   )}
                   {/* Main label */}
-                  <span className={`leading-none ${key.shiftLabel ? "mb-0.5" : "my-auto"} ${isTarget ? "font-bold text-white" : ""}`}>
+                  <span className={`leading-none ${key.shiftLabel ? "mb-0.5" : "my-auto"} ${isTarget ? "font-bold text-cyan-700" : ""}`}>
                     {key.label}
                   </span>
 
                   {/* Tactile bump on F and J keys */}
                   {key.hasBump && (
-                    <span className="absolute bottom-1 w-2.5 h-[1.5px] bg-[#586480] rounded-full" />
+                    <span className="absolute bottom-1 w-2.5 h-[1.5px] bg-slate-400 rounded-full" />
                   )}
 
                   {/* Caps Lock indicator line */}
                   {key.id === "CapsLock" && (
-                    <span className="absolute bottom-1 left-2 w-3 h-[2px] bg-[#3a4560] rounded-full" />
+                    <span className="absolute bottom-1 left-2 w-3 h-[2px] bg-slate-400 rounded-full" />
                   )}
                 </button>
               );
