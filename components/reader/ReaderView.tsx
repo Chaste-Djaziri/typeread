@@ -967,7 +967,7 @@ export function ReaderView({
                 <p className="text-[10px] uppercase text-slate-500">Accuracy</p>
                 <p className="text-2xl font-bold text-emerald-600 mt-0.5">{aggStats.avgAcc}%</p>
               </div>
-              <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47] col-span-2 sm:col-span-1">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 col-span-2 sm:col-span-1">
                 <p className="text-[10px] uppercase text-slate-500">Paragraphs</p>
                 <p className="text-2xl font-bold text-slate-900 mt-0.5">{totalBookParagraphs}</p>
               </div>
