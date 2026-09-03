@@ -8,6 +8,8 @@ import { UploadDropzone } from "@/components/reader/UploadDropzone";
 import { useHydrated } from "@/hooks/useHydrated";
 import Link from "next/link";
 
+import { HeroSection } from "@/components/home/HeroSection";
+
 export default function CatalogPage() {
   const isHydrated = useHydrated();
   const [showUpload, setShowUpload] = useState(false);
@@ -72,129 +74,46 @@ export default function CatalogPage() {
       {/* MAIN CONTENT - Header/Footer via global layout */}
       <main className="flex-1 flex flex-col">
         {/* HERO SECTION */}
-        <section className="relative overflow-hidden bg-white border-b border-slate-200">
-          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-50 via-white to-white" />
-          <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#f1f5f9_1px,transparent_1px),linear-gradient(to_bottom,#f1f5f9_1px,transparent_1px)] bg-[size:32px_32px] opacity-40" aria-hidden="true" />
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
-            <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+        <HeroSection
+          books={books}
+          stats={stats}
+          onUploadClick={() => setShowUpload(true)}
+        />
+
+        {/* FEATURES HIGHLIGHT STRIP */}
+        <section className="bg-slate-50/70 border-b border-slate-200/80">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-7 grid sm:grid-cols-3 gap-4 lg:gap-6">
+            <div className="flex items-start gap-3.5 p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-slate-300 transition-colors">
+              <span className="shrink-0 w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-100 flex items-center justify-center text-cyan-700 text-lg">
+                📚
+              </span>
               <div>
-                <span className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-cyan-700 bg-cyan-50 border border-cyan-200 px-3 py-1.5 rounded-full">
-                  <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" aria-hidden="true" />
-                  Read by Typing
-                </span>
-                <h1 className="mt-4 text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 leading-[1.05]">
-                  Type your way
-                  <br className="hidden sm:block" />
-                  <span className="bg-gradient-to-r from-cyan-600 to-violet-600 bg-clip-text text-transparent">through stories.</span>
-                </h1>
-                <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">
-                  Turn any EPUB, PDF or TXT into a focused typing workout. Type paragraph by paragraph with live WPM, accuracy and mechanical sound feedback — progress is saved automatically.
+                <h3 className="text-sm font-bold text-slate-900">Any Book, Any Format</h3>
+                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                  EPUB, PDF, TXT, or Markdown. Stored 100% locally and privately in your browser storage.
                 </p>
-                <div className="mt-8 flex flex-wrap gap-3">
-                  <Link
-                    href={books[0] ? `/read/${books[0].id}` : "/books"}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 hover:bg-black text-white text-sm font-semibold shadow-sm hover:shadow transition-all"
-                  >
-                    Start Typing <span aria-hidden="true">→</span>
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => setShowUpload(true)}
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-slate-50 text-slate-900 text-sm font-semibold border border-slate-200 shadow-sm transition-colors"
-                  >
-                    Upload Book
-                  </button>
-                  <Link
-                    href="/books"
-                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-cyan-50 hover:bg-cyan-100 text-cyan-700 text-sm font-semibold border border-cyan-200 transition-colors"
-                  >
-                    Browse Library
-                  </Link>
-                </div>
-                <div className="mt-8 flex flex-wrap items-center gap-6 text-sm">
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs">✓</span>
-                    <span className="text-slate-600">
-                      <span className="font-semibold text-slate-900">{stats.completedBooks}</span> books completed
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-cyan-50 border border-cyan-200 text-cyan-700 font-mono text-xs">Ω</span>
-                    <span className="text-slate-600">
-                      <span className="font-semibold text-slate-900">{stats.avgWpm || "—"}</span> avg WPM
-                    </span>
-                  </div>
-                  <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" />
-                    {stats.completedParagraphs}/{stats.totalParagraphs} paragraphs typed
-                  </div>
-                </div>
-              </div>
-
-              {/* Visual mock */}
-              <div className="relative">
-                <div className="relative rounded-[2rem] border border-slate-200 bg-white shadow-xl overflow-hidden">
-                  <div className="h-10 bg-slate-50 border-b border-slate-200 flex items-center gap-1.5 px-4">
-                    <span className="w-3 h-3 rounded-full bg-red-400" aria-hidden="true" />
-                    <span className="w-3 h-3 rounded-full bg-yellow-400" aria-hidden="true" />
-                    <span className="w-3 h-3 rounded-full bg-green-400" aria-hidden="true" />
-                    <span className="ml-3 text-xs font-mono text-slate-500">chapter_01.txt — typing mode</span>
-                  </div>
-                  <div className="p-6 sm:p-8 space-y-4">
-                    <div className="space-y-2">
-                      <div className="h-2.5 bg-slate-900 rounded-full w-3/4" />
-                      <div className="h-2.5 bg-slate-200 rounded-full w-full" />
-                      <div className="h-2.5 bg-slate-200 rounded-full w-5/6" />
-                      <div className="h-2.5 bg-emerald-500 rounded-full w-2/3" />
-                    </div>
-                    <div className="grid grid-cols-3 gap-3 pt-4">
-                      <div className="rounded-xl bg-slate-900 text-white p-3 text-center">
-                        <p className="text-[11px] uppercase tracking-widest text-slate-400">WPM</p>
-                        <p className="text-xl font-bold">{stats.avgWpm || 42}</p>
-                      </div>
-                      <div className="rounded-xl bg-cyan-500 text-white p-3 text-center">
-                        <p className="text-[11px] uppercase tracking-widest text-cyan-100">Accuracy</p>
-                        <p className="text-xl font-bold">98%</p>
-                      </div>
-                      <div className="rounded-xl bg-white border border-slate-200 p-3 text-center">
-                        <p className="text-[11px] uppercase tracking-widest text-slate-500">Progress</p>
-                        <p className="text-xl font-bold text-slate-900">{books.length} books</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center justify-between pt-2 text-xs font-mono text-slate-500">
-                      <span>Press Enter ↵ to continue</span>
-                      <span className="px-2 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700">TYPING</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="absolute -z-10 top-6 -right-6 w-full h-full rounded-[2rem] bg-gradient-to-br from-cyan-100 to-violet-100 border border-slate-200" aria-hidden="true" />
               </div>
             </div>
-          </div>
-        </section>
-
-        {/* FEATURES STRIP */}
-        <section className="bg-slate-50 border-b border-slate-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid sm:grid-cols-3 gap-4">
-            <div className="flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-              <span className="shrink-0 w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-200 flex items-center justify-center text-cyan-700">⌨️</span>
+            <div className="flex items-start gap-3.5 p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-slate-300 transition-colors">
+              <span className="shrink-0 w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-700 text-lg">
+                ⌨️
+              </span>
               <div>
-                <h3 className="text-sm font-semibold text-slate-900">Any Book, Any Format</h3>
-                <p className="text-xs text-slate-600 mt-1">EPUB, PDF, TXT or Markdown — stays 100% local on your device.</p>
+                <h3 className="text-sm font-bold text-slate-900">Tactile Live Feedback</h3>
+                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                  Synthesized mechanical clicks, on-screen keyboard guide, and real-time WPM & accuracy meters.
+                </p>
               </div>
             </div>
-            <div className="flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-              <span className="shrink-0 w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">◐</span>
+            <div className="flex items-start gap-3.5 p-4 sm:p-5 rounded-2xl bg-white border border-slate-200/80 shadow-xs hover:border-slate-300 transition-colors">
+              <span className="shrink-0 w-10 h-10 rounded-xl bg-indigo-50 border border-indigo-100 flex items-center justify-center text-indigo-700 text-lg">
+                📊
+              </span>
               <div>
-                <h3 className="text-sm font-semibold text-slate-900">Live Feedback</h3>
-                <p className="text-xs text-slate-600 mt-1">Mechanical clicks, visual keyboard and per-paragraph WPM & accuracy.</p>
-              </div>
-            </div>
-            <div className="flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
-              <span className="shrink-0 w-10 h-10 rounded-xl bg-violet-50 border border-violet-200 flex items-center justify-center text-violet-700">≡</span>
-              <div>
-                <h3 className="text-sm font-semibold text-slate-900">Track Progress</h3>
-                <p className="text-xs text-slate-600 mt-1">Chapter and book stats, streaks and fastest paragraphs — all saved locally.</p>
+                <h3 className="text-sm font-bold text-slate-900">Persistent Progress</h3>
+                <p className="text-xs text-slate-600 mt-1 leading-relaxed">
+                  Seamlessly resume where you left off. Track completion rate across chapters, books, and speed runs.
+                </p>
               </div>
             </div>
           </div>
