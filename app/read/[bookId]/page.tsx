@@ -34,7 +34,7 @@ export default function ReadPage({
         </p>
         <Link
           href="/"
-          className="px-5 py-2.5 rounded-full bg-cyan-500 text-white font-semibold hover:bg-cyan-600 transition-colors text-sm shadow-sm"
+          className="px-5 py-2.5 rounded-full bg-blue-600 text-white font-semibold hover:bg-blue-700 transition-colors text-sm shadow-sm"
         >
           ← Back to Book Catalog
         </Link>

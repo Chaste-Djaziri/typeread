@@ -163,11 +163,11 @@ export function Header() {
             <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-700 flex items-center justify-between gap-2">
               <span className="text-slate-500">Need free EPUB books?</span>
               <div className="flex items-center gap-2 font-mono text-[11px]">
-                <a href="https://z-library.sk/" target="_blank" rel="noopener noreferrer" className="text-cyan-600 hover:underline">
+                <a href="https://z-library.sk/" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                   Z-Library ↗
                 </a>
                 <span className="text-slate-300">·</span>
-                <a href="https://digilibraries.com" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:underline">
+                <a href="https://digilibraries.com" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">
                   DigiLibraries ↗
                 </a>
               </div>

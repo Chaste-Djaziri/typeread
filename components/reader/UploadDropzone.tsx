@@ -85,7 +85,7 @@ export function UploadDropzone({ onBookImported }: Props) {
         handleFiles(e.dataTransfer.files);
       }}
       className={`relative rounded-2xl border-2 border-dashed p-6 sm:p-8 text-center transition-colors ${
-        dragOver ? "border-cyan-400 bg-cyan-50" : "border-slate-300 bg-slate-50 hover:bg-white"
+        dragOver ? "border-blue-500 bg-blue-50" : "border-slate-300 bg-slate-50 hover:bg-white"
       }`}
     >
       <input

@@ -23,7 +23,7 @@ export function ModeToggle({ mode, onChange }: { mode: Mode; onChange: (m: Mode)
         </span>
 
         {/* Book icon */}
-        <span className={`text-[11px] leading-none transition-opacity ${!isTyping ? "opacity-100 text-cyan-600" : "opacity-40 text-slate-400"}`}>
+        <span className={`text-[11px] leading-none transition-opacity ${!isTyping ? "opacity-100 text-blue-600" : "opacity-40 text-slate-400"}`}>
           📖
         </span>
 
@@ -32,7 +32,7 @@ export function ModeToggle({ mode, onChange }: { mode: Mode; onChange: (m: Mode)
           className={`absolute top-0.5 bottom-0.5 w-6 rounded-full transition-transform duration-200 flex items-center justify-center shadow-md ${
             isTyping
               ? "left-0.5 translate-x-0 bg-emerald-500"
-              : "left-0.5 translate-x-7 bg-cyan-500"
+              : "left-0.5 translate-x-7 bg-blue-600"
           }`}
         />
       </button>

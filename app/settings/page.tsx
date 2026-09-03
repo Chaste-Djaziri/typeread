@@ -34,7 +34,7 @@ export default function SettingsPage() {
         </div>
         <Link
           href="/"
-          className="px-4 py-2 rounded-full bg-cyan-500 text-white hover:bg-cyan-600 text-sm font-medium transition-colors shadow-sm"
+          className="px-4 py-2 rounded-full bg-blue-600 text-white hover:bg-blue-700 text-sm font-medium transition-colors shadow-2xs"
         >
           Back to Reader →
         </Link>
@@ -54,7 +54,7 @@ export default function SettingsPage() {
                 update({ soundFeedback: e.target.checked });
                 if (e.target.checked) soundEngine.playKey(" ");
               }}
-              className="w-4 h-4 rounded text-cyan-500 accent-cyan-500"
+              className="w-4 h-4 rounded text-blue-600 accent-blue-600"
             />
             <span>Enable mechanical keyboard click sound feedback on keystrokes</span>
           </label>
@@ -74,7 +74,7 @@ export default function SettingsPage() {
                 update({ soundVolume: vol });
                 soundEngine.playKey(" ");
               }}
-              className="w-full accent-cyan-400 cursor-pointer"
+              className="w-full accent-blue-600 cursor-pointer"
             />
           </div>
         </section>
@@ -87,7 +87,7 @@ export default function SettingsPage() {
               type="checkbox"
               checked={s.showKeyboard}
               onChange={(e) => update({ showKeyboard: e.target.checked })}
-              className="w-4 h-4 rounded text-cyan-500 accent-cyan-500"
+              className="w-4 h-4 rounded text-blue-600 accent-blue-600"
             />
             <span>Show on-screen visual keyboard in Typing Mode</span>
           </label>
@@ -96,7 +96,7 @@ export default function SettingsPage() {
             <select
               value={s.keyboardLayout}
               onChange={(e) => update({ keyboardLayout: e.target.value as Settings["keyboardLayout"] })}
-              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+              className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
             >
               <option value="qwerty">QWERTY</option>
               <option value="qwertz">QWERTZ</option>
@@ -114,7 +114,7 @@ export default function SettingsPage() {
               <select
                 value={s.typingFont}
                 onChange={(e) => update({ typingFont: e.target.value as Settings["typingFont"] })}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value="mono">Mono (Geist Mono)</option>
                 <option value="sans">Sans (Geist)</option>
@@ -129,7 +129,7 @@ export default function SettingsPage() {
                 max="32"
                 value={s.typingFontSize}
                 onChange={(e) => update({ typingFontSize: Number(e.target.value) })}
-                className="w-full accent-cyan-400"
+                className="w-full accent-blue-600"
               />
             </label>
             <label className="space-y-1">
@@ -141,7 +141,7 @@ export default function SettingsPage() {
                 step="0.1"
                 value={s.typingLineHeight}
                 onChange={(e) => update({ typingLineHeight: Number(e.target.value) })}
-                className="w-full accent-cyan-400"
+                className="w-full accent-blue-600"
               />
             </label>
             <label className="space-y-1">
@@ -153,7 +153,7 @@ export default function SettingsPage() {
                 step="0.01"
                 value={s.typingLetterSpacing}
                 onChange={(e) => update({ typingLetterSpacing: Number(e.target.value) })}
-                className="w-full accent-cyan-400"
+                className="w-full accent-blue-600"
               />
             </label>
           </div>
@@ -168,7 +168,7 @@ export default function SettingsPage() {
               <select
                 value={s.readingFont}
                 onChange={(e) => update({ readingFont: e.target.value as Settings["readingFont"] })}
-                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-cyan-500"
+                className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
               >
                 <option value="serif">Serif (Georgia)</option>
                 <option value="sans">Sans (Geist)</option>
@@ -183,7 +183,7 @@ export default function SettingsPage() {
                 max="32"
                 value={s.readingFontSize}
                 onChange={(e) => update({ readingFontSize: Number(e.target.value) })}
-                className="w-full accent-cyan-400"
+                className="w-full accent-blue-600"
               />
             </label>
             <label className="space-y-1">
@@ -195,7 +195,7 @@ export default function SettingsPage() {
                 step="0.1"
                 value={s.readingLineHeight}
                 onChange={(e) => update({ readingLineHeight: Number(e.target.value) })}
-                className="w-full accent-cyan-400"
+                className="w-full accent-blue-600"
               />
             </label>
             <label className="space-y-1">
@@ -207,7 +207,7 @@ export default function SettingsPage() {
                 step="0.01"
                 value={s.readingLetterSpacing}
                 onChange={(e) => update({ readingLetterSpacing: Number(e.target.value) })}
-                className="w-full accent-cyan-400"
+                className="w-full accent-blue-600"
               />
             </label>
           </div>

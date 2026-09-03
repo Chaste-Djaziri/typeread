@@ -167,7 +167,7 @@ export function ChapterTransitionModal({
           <button
             type="button"
             onClick={onContinue}
-            className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white text-xs font-bold tracking-wider uppercase transition-all shadow-md flex items-center justify-center gap-1"
+            className="py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold tracking-wider uppercase transition-all shadow-md flex items-center justify-center gap-1"
           >
             <span>CONTINUE</span>
             <span className="text-[10px] opacity-70">↵</span>
@@ -181,7 +181,7 @@ export function ChapterTransitionModal({
             onClick={() => setActiveTab("chapter")}
             className={`flex-1 py-2 text-center font-medium border-b-2 transition-colors ${
               activeTab === "chapter"
-                ? "border-cyan-500 text-cyan-700 font-semibold"
+                ? "border-blue-600 text-blue-700 font-semibold"
                 : "border-transparent text-slate-500 hover:text-slate-700"
             }`}
           >
@@ -192,7 +192,7 @@ export function ChapterTransitionModal({
             onClick={() => setActiveTab("book")}
             className={`flex-1 py-2 text-center font-medium border-b-2 transition-colors ${
               activeTab === "book"
-                ? "border-cyan-500 text-cyan-700 font-semibold"
+                ? "border-blue-600 text-blue-700 font-semibold"
                 : "border-transparent text-slate-500 hover:text-slate-700"
             }`}
           >
@@ -204,15 +204,15 @@ export function ChapterTransitionModal({
         <div className="divide-y divide-slate-200 text-sm font-mono">
           <div className="py-2 flex items-center justify-between">
             <span className="text-slate-500">Speed</span>
-            <span className="font-semibold text-cyan-600">{currentDisplay.speed.toFixed(2)} wpm</span>
+            <span className="font-semibold text-blue-600">{currentDisplay.speed.toFixed(2)} wpm</span>
           </div>
           <div className="py-2 flex items-center justify-between">
             <span className="text-slate-500">Accuracy</span>
-            <span className="font-semibold text-emerald-600">{currentDisplay.accuracy.toFixed(2)} %</span>
+            <span className="font-semibold text-slate-900">{currentDisplay.accuracy.toFixed(2)} %</span>
           </div>
           <div className="py-2 flex items-center justify-between">
             <span className="text-slate-500">Consistency</span>
-            <span className="font-semibold text-violet-600">{currentDisplay.consistency.toFixed(2)} %</span>
+            <span className="font-semibold text-slate-900">{currentDisplay.consistency.toFixed(2)} %</span>
           </div>
           <div className="py-2 flex items-center justify-between">
             <span className="text-slate-500">Typing Time</span>
@@ -224,7 +224,7 @@ export function ChapterTransitionModal({
           </div>
           <div className="py-2 flex items-center justify-between">
             <span className="text-slate-500">Fastest paragraph</span>
-            <span className="font-semibold text-amber-600">{currentDisplay.fastestWpm.toFixed(2)} wpm</span>
+            <span className="font-semibold text-blue-600">{currentDisplay.fastestWpm.toFixed(2)} wpm</span>
           </div>
         </div>
 
@@ -233,7 +233,7 @@ export function ChapterTransitionModal({
           <button
             type="button"
             onClick={handleShare}
-            className="text-cyan-600 hover:text-cyan-700 transition-colors flex items-center gap-1.5 font-mono"
+            className="text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-1.5 font-mono"
           >
             <span>{copied ? "✓ Copied!" : "Share as Image"}</span>
           </button>

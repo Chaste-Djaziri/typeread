@@ -35,7 +35,7 @@ export function StatsBar({ wpm, accuracy, progress, progressPercent, elapsedLabe
       <div className="hidden md:flex items-center gap-2 ml-1">
         <span className="text-slate-500">{progress}</span>
         <div className="w-20 h-1.5 rounded-full bg-slate-200 overflow-hidden">
-          <div className="h-full bg-cyan-500 transition-all" style={{ width: `${progressPercent}%` }} />
+          <div className="h-full bg-blue-600 transition-all" style={{ width: `${progressPercent}%` }} />
         </div>
       </div>
     </div>

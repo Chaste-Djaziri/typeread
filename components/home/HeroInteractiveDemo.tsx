@@ -214,7 +214,7 @@ export function HeroInteractiveDemo() {
       ref={containerRef}
       onClick={handleContainerClick}
       className={`relative w-full max-w-xl mx-auto rounded-[2rem] bg-white border transition-all duration-300 shadow-[0_20px_60px_-15px_rgba(15,23,42,0.08)] cursor-pointer group select-none ${
-        isFocused ? "border-cyan-400 ring-4 ring-cyan-500/10" : "border-slate-200/90 hover:border-slate-300"
+        isFocused ? "border-blue-500 ring-4 ring-blue-500/10" : "border-slate-200/90 hover:border-slate-300"
       }`}
     >
       {/* Hidden input to capture user keystrokes anywhere in the card */}
@@ -230,7 +230,7 @@ export function HeroInteractiveDemo() {
 
       {/* Decorative ambient backdrop glow */}
       <div
-        className="absolute -inset-1 rounded-[2.2rem] bg-gradient-to-tr from-cyan-200/30 via-violet-200/20 to-amber-100/30 blur-2xl -z-10 opacity-70 group-hover:opacity-100 transition-opacity"
+        className="absolute -inset-1 rounded-[2.2rem] bg-gradient-to-tr from-blue-200/30 via-indigo-100/20 to-blue-100/30 blur-2xl -z-10 opacity-70 group-hover:opacity-100 transition-opacity"
         aria-hidden="true"
       />
 
@@ -258,14 +258,14 @@ export function HeroInteractiveDemo() {
             onClick={toggleSound}
             className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium transition-all ${
               soundEnabled
-                ? "bg-cyan-50 border border-cyan-200 text-cyan-700 shadow-xs"
+                ? "bg-blue-50 border border-blue-200 text-blue-700 shadow-2xs"
                 : "bg-white border border-slate-200 text-slate-500 hover:text-slate-800"
             }`}
             title={soundEnabled ? "Mute mechanical sounds" : "Enable mechanical typing sounds"}
           >
             {soundEnabled ? (
               <>
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
                 <span className="font-mono">Sound ON</span>
               </>
             ) : (
@@ -304,7 +304,7 @@ export function HeroInteractiveDemo() {
 
           {/* Glowing Caret */}
           {!isFinished && (
-            <span className="inline-block w-[2.5px] h-[1.15em] bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.7)] align-[-0.15em] mx-[1px] animate-caret" />
+            <span className="inline-block w-[2.5px] h-[1.15em] bg-blue-600 shadow-[0_0_8px_rgba(37,99,235,0.7)] align-[-0.15em] mx-[1px] animate-caret" />
           )}
 
           {/* Remaining upcoming characters */}
@@ -314,7 +314,7 @@ export function HeroInteractiveDemo() {
 
           {/* Completed Return Symbol */}
           {isFinished && (
-            <span className="inline-flex items-center gap-1.5 ml-2 text-xs font-sans font-semibold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200 animate-pulse">
+            <span className="inline-flex items-center gap-1.5 ml-2 text-xs font-sans font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200 animate-pulse">
               ✓ Paragraph Completed!
             </span>
           )}
@@ -325,12 +325,12 @@ export function HeroInteractiveDemo() {
           <div className="flex items-center gap-2 text-slate-500">
             {mode === "auto" ? (
               <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 animate-pulse" />
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600 animate-pulse" />
                 Live Demo · Click anywhere to type
               </span>
             ) : (
-              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-cyan-800 bg-cyan-50 border border-cyan-200 px-2.5 py-1 rounded-full">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-blue-800 bg-blue-50 border border-blue-200 px-2.5 py-1 rounded-full">
+                <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
                 Typing Live · Press keys or Backspace
               </span>
             )}
@@ -377,7 +377,7 @@ export function HeroInteractiveDemo() {
           <p className="text-[10px] font-mono font-bold tracking-widest uppercase text-slate-400">Progress</p>
           <div className="mt-2 w-full max-w-[80px] mx-auto bg-slate-200 h-1.5 rounded-full overflow-hidden">
             <div
-              className="h-full bg-cyan-500 rounded-full transition-all duration-300"
+              className="h-full bg-blue-600 rounded-full transition-all duration-300"
               style={{ width: `${progressPct}%` }}
             />
           </div>

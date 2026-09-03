@@ -198,7 +198,7 @@ export function VisualKeyboard({ activeKey, nextChar, onKeyPress, className = ""
                       isPressed
                         ? "bg-emerald-50 text-emerald-700 border-emerald-400 shadow-sm scale-[0.96] translate-y-0.5"
                         : isTarget
-                        ? "bg-cyan-50 text-cyan-700 border-cyan-400 shadow-sm ring-1 ring-cyan-300"
+                        ? "bg-blue-50 text-blue-700 border-blue-400 shadow-sm ring-1 ring-blue-300"
                         : "bg-slate-50 text-slate-600 hover:text-slate-900 border-slate-200 hover:bg-white shadow-sm"
                     }
                   `}
@@ -210,7 +210,7 @@ export function VisualKeyboard({ activeKey, nextChar, onKeyPress, className = ""
                     </span>
                   )}
                   {/* Main label */}
-                  <span className={`leading-none ${key.shiftLabel ? "mb-0.5" : "my-auto"} ${isTarget ? "font-bold text-cyan-700" : ""}`}>
+                  <span className={`leading-none ${key.shiftLabel ? "mb-0.5" : "my-auto"} ${isTarget ? "font-bold text-blue-700" : ""}`}>
                     {key.label}
                   </span>
 
