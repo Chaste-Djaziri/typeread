@@ -143,14 +143,14 @@ export function ChapterTransitionModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-      <div className="bg-[#121622] border border-[#262f44] rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-150">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-md">
+      <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-6 animate-in fade-in zoom-in-95 duration-150">
         {/* Next chapter preview header */}
         <div className="text-center space-y-1">
-          <p className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+          <p className="text-xs font-mono uppercase tracking-widest text-slate-500">
             Next chapter
           </p>
-          <h2 className="text-xl sm:text-2xl font-bold text-white tracking-tight">
+          <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
             {nextChapter?.title ?? `Chapter ${nextChapterIdx + 1}`}
           </h2>
         </div>
@@ -160,14 +160,14 @@ export function ChapterTransitionModal({
           <button
             type="button"
             onClick={onOpenContents}
-            className="py-2.5 px-4 rounded-xl border border-[#2b354d] bg-[#171d2c] hover:bg-[#1f273b] text-zinc-300 hover:text-white text-xs font-semibold tracking-wider uppercase transition-colors"
+            className="py-2.5 px-4 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 text-xs font-semibold tracking-wider uppercase transition-colors"
           >
             CONTENTS
           </button>
           <button
             type="button"
             onClick={onContinue}
-            className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-black text-xs font-bold tracking-wider uppercase transition-all shadow-lg shadow-cyan-500/20 flex items-center justify-center gap-1"
+            className="py-2.5 px-4 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white text-xs font-bold tracking-wider uppercase transition-all shadow-md flex items-center justify-center gap-1"
           >
             <span>CONTINUE</span>
             <span className="text-[10px] opacity-70">↵</span>
@@ -175,14 +175,14 @@ export function ChapterTransitionModal({
         </div>
 
         {/* Tabs: Chapter Stats | Book Stats */}
-        <div className="flex border-b border-[#232b3f] text-sm">
+        <div className="flex border-b border-slate-200 text-sm">
           <button
             type="button"
             onClick={() => setActiveTab("chapter")}
             className={`flex-1 py-2 text-center font-medium border-b-2 transition-colors ${
               activeTab === "chapter"
-                ? "border-cyan-400 text-cyan-300 font-semibold"
-                : "border-transparent text-zinc-400 hover:text-zinc-200"
+                ? "border-cyan-500 text-cyan-700 font-semibold"
+                : "border-transparent text-slate-500 hover:text-slate-700"
             }`}
           >
             Chapter Stats
@@ -192,8 +192,8 @@ export function ChapterTransitionModal({
             onClick={() => setActiveTab("book")}
             className={`flex-1 py-2 text-center font-medium border-b-2 transition-colors ${
               activeTab === "book"
-                ? "border-cyan-400 text-cyan-300 font-semibold"
-                : "border-transparent text-zinc-400 hover:text-zinc-200"
+                ? "border-cyan-500 text-cyan-700 font-semibold"
+                : "border-transparent text-slate-500 hover:text-slate-700"
             }`}
           >
             Book Stats
@@ -201,30 +201,30 @@ export function ChapterTransitionModal({
         </div>
 
         {/* Stats Table / Grid matching prompt specification */}
-        <div className="divide-y divide-[#1e2638] text-sm font-mono">
+        <div className="divide-y divide-slate-200 text-sm font-mono">
           <div className="py-2 flex items-center justify-between">
-            <span className="text-zinc-400">Speed</span>
-            <span className="font-semibold text-cyan-300">{currentDisplay.speed.toFixed(2)} wpm</span>
+            <span className="text-slate-500">Speed</span>
+            <span className="font-semibold text-cyan-600">{currentDisplay.speed.toFixed(2)} wpm</span>
           </div>
           <div className="py-2 flex items-center justify-between">
-            <span className="text-zinc-400">Accuracy</span>
-            <span className="font-semibold text-emerald-400">{currentDisplay.accuracy.toFixed(2)} %</span>
+            <span className="text-slate-500">Accuracy</span>
+            <span className="font-semibold text-emerald-600">{currentDisplay.accuracy.toFixed(2)} %</span>
           </div>
           <div className="py-2 flex items-center justify-between">
-            <span className="text-zinc-400">Consistency</span>
-            <span className="font-semibold text-purple-300">{currentDisplay.consistency.toFixed(2)} %</span>
+            <span className="text-slate-500">Consistency</span>
+            <span className="font-semibold text-violet-600">{currentDisplay.consistency.toFixed(2)} %</span>
           </div>
           <div className="py-2 flex items-center justify-between">
-            <span className="text-zinc-400">Typing Time</span>
-            <span className="font-semibold text-white">{formatDuration(currentDisplay.timeMs)}</span>
+            <span className="text-slate-500">Typing Time</span>
+            <span className="font-semibold text-slate-900">{formatDuration(currentDisplay.timeMs)}</span>
           </div>
           <div className="py-2 flex items-center justify-between">
-            <span className="text-zinc-400">Words typed</span>
-            <span className="font-semibold text-white">{currentDisplay.wordsTyped}</span>
+            <span className="text-slate-500">Words typed</span>
+            <span className="font-semibold text-slate-900">{currentDisplay.wordsTyped}</span>
           </div>
           <div className="py-2 flex items-center justify-between">
-            <span className="text-zinc-400">Fastest paragraph</span>
-            <span className="font-semibold text-amber-300">{currentDisplay.fastestWpm.toFixed(2)} wpm</span>
+            <span className="text-slate-500">Fastest paragraph</span>
+            <span className="font-semibold text-amber-600">{currentDisplay.fastestWpm.toFixed(2)} wpm</span>
           </div>
         </div>
 
@@ -233,7 +233,7 @@ export function ChapterTransitionModal({
           <button
             type="button"
             onClick={handleShare}
-            className="text-cyan-400 hover:text-cyan-300 transition-colors flex items-center gap-1.5 font-mono"
+            className="text-cyan-600 hover:text-cyan-700 transition-colors flex items-center gap-1.5 font-mono"
           >
             <span>{copied ? "✓ Copied!" : "Share as Image"}</span>
           </button>
@@ -241,17 +241,17 @@ export function ChapterTransitionModal({
           <button
             type="button"
             onClick={onContinue}
-            className="text-zinc-400 hover:text-zinc-200 text-xs font-mono transition-colors"
+            className="text-slate-500 hover:text-slate-700 text-xs font-mono transition-colors"
           >
             Skip to next chapter →
           </button>
         </div>
 
         {/* Footer info matching Entertrained */}
-        <div className="pt-3 border-t border-[#1e2638] text-[10px] text-zinc-500 text-center space-y-1">
+        <div className="pt-3 border-t border-slate-200 text-[10px] text-slate-500 text-center space-y-1">
           <p>© 2026 TypeRead · Current version: 1.34.0</p>
           <p>
-            Press <kbd className="px-1.5 py-0.5 bg-[#1b2234] text-zinc-300 rounded border border-[#2d3852]">Enter</kbd> to continue to next chapter
+            Press <kbd className="px-1.5 py-0.5 bg-slate-100 text-slate-600 rounded border border-slate-200">Enter</kbd> to continue to next chapter
           </p>
         </div>
       </div>
