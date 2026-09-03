@@ -409,6 +409,7 @@ export default function CatalogPage() {
             </a>
           </div>
         </section>
+        </div>
       </main>
 
       {/* 4. UPLOAD MODAL */}
