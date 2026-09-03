@@ -13,17 +13,17 @@ export function StatsBar({ wpm, accuracy, progress, progressPercent, elapsedLabe
     <div className="flex items-center gap-3 text-sm">
       <div className="hidden sm:flex items-center gap-3">
         <span className="inline-flex items-center gap-1.5">
-          <span className="text-zinc-500">WPM</span>
+          <span className="text-slate-500">WPM</span>
           <span className="font-mono font-semibold min-w-[2ch]">{wpm}</span>
         </span>
-        <span className="w-px h-4 bg-black/10 dark:bg-white/10" />
+        <span className="w-px h-4 bg-slate-200" />
         <span className="inline-flex items-center gap-1.5">
-          <span className="text-zinc-500">Acc</span>
+          <span className="text-slate-500">Acc</span>
           <span className="font-mono font-semibold">{accuracy}%</span>
         </span>
-        <span className="w-px h-4 bg-black/10 dark:bg-white/10" />
+        <span className="w-px h-4 bg-slate-200" />
         <span className="inline-flex items-center gap-1.5">
-          <span className="text-zinc-500">Time</span>
+          <span className="text-slate-500">Time</span>
           <span className="font-mono">{elapsedLabel}</span>
         </span>
       </div>
@@ -33,9 +33,9 @@ export function StatsBar({ wpm, accuracy, progress, progressPercent, elapsedLabe
         <span>{accuracy}%</span>
       </div>
       <div className="hidden md:flex items-center gap-2 ml-1">
-        <span className="text-zinc-500">{progress}</span>
-        <div className="w-20 h-1.5 rounded-full bg-black/10 dark:bg-white/10 overflow-hidden">
-          <div className="h-full bg-black dark:bg-white transition-all" style={{ width: `${progressPercent}%` }} />
+        <span className="text-slate-500">{progress}</span>
+        <div className="w-20 h-1.5 rounded-full bg-slate-200 overflow-hidden">
+          <div className="h-full bg-cyan-500 transition-all" style={{ width: `${progressPercent}%` }} />
         </div>
       </div>
     </div>
