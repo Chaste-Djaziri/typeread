@@ -468,7 +468,7 @@ export function ReaderView({
           {/* Left: Brand + Breadcrumb */}
           <div className="flex items-center gap-3 min-w-0 flex-1">
             <Link href="/" className="shrink-0 flex items-center" title="TypeRead – Home">
-              <img src="/typeread-logo.png" alt="TypeRead logo" className="h-9 sm:h-10 w-auto object-contain" />
+              <img src="/typeread-logo.png" alt="TypeRead logo" className="h-10 sm:h-12 w-auto object-contain" />
             </Link>
             <span className="hidden sm:block w-px h-6 bg-slate-200" aria-hidden="true" />
             <nav className="hidden sm:flex items-center gap-1.5 min-w-0 text-sm" aria-label="Breadcrumb">
