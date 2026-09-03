@@ -72,13 +72,14 @@ export default function CatalogPage() {
       {/* 1. TOP HEADER */}
       <header className="sticky top-0 z-30 backdrop-blur-md bg-white/90 border-b border-slate-200">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <span className="w-8 h-8 rounded-lg bg-gradient-to-br from-cyan-400 to-emerald-400 text-white flex items-center justify-center font-mono text-sm font-black shadow-sm">
-              TR
-            </span>
-            <span className="font-bold text-base tracking-tight text-slate-900">TypeRead</span>
+          <Link href="/" className="flex items-center gap-3">
+            <img
+              src="/typeread-logo.png"
+              alt="TypeRead logo"
+              className="h-8 w-auto object-contain"
+            />
             <span className="hidden sm:inline text-xs text-slate-500">Read by Typing</span>
-          </div>
+          </Link>
 
           <nav className="flex items-center gap-2 sm:gap-3">
             <Link
