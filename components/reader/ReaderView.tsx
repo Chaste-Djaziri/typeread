@@ -468,7 +468,7 @@ export function ReaderView({
           {/* Breadcrumb: Logo + Catalog Link + Book Title / Chapter Title */}
           <div className="flex items-center gap-2 sm:gap-2.5 overflow-hidden text-xs sm:text-sm">
             <Link href="/" className="shrink-0 flex items-center" title="TypeRead – Book Catalog">
-              <img src="/typeread-logo.png" alt="TypeRead logo" className="h-6 sm:h-7 w-auto object-contain" />
+              <img src="/typeread-logo.png" alt="TypeRead logo" className="h-9 sm:h-10 w-auto object-contain" />
             </Link>
             <Link
               href="/"
