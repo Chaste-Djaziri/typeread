@@ -85,7 +85,7 @@ export function UploadDropzone({ onBookImported }: Props) {
         handleFiles(e.dataTransfer.files);
       }}
       className={`relative rounded-2xl border-2 border-dashed p-6 sm:p-8 text-center transition-colors ${
-        dragOver ? "border-black bg-zinc-50 dark:border-white dark:bg-zinc-900" : "border-black/15 dark:border-white/15 bg-white dark:bg-zinc-900"
+        dragOver ? "border-cyan-400 bg-cyan-50" : "border-slate-300 bg-slate-50 hover:bg-white"
       }`}
     >
       <input
@@ -96,10 +96,10 @@ export function UploadDropzone({ onBookImported }: Props) {
         disabled={loading}
       />
       <div className="pointer-events-none space-y-2">
-        <p className="text-sm font-semibold">Drop your book here or click to upload</p>
-        <p className="text-xs text-zinc-500">EPUB, PDF (text), TXT, MD — max 50 MB · stays local</p>
-        {loading && <p className="text-xs font-mono text-zinc-600">Parsing… {progress !== null ? `${progress}%` : ""}</p>}
-        {error && <p className="text-xs text-red-600">{error}</p>}
+        <p className="text-sm font-semibold text-slate-900">Drop your book here or click to upload</p>
+        <p className="text-xs text-slate-500">EPUB, PDF (text), TXT, MD — max 50 MB · stays local</p>
+        {loading && <p className="text-xs font-mono text-slate-600">Parsing… {progress !== null ? `${progress}%` : ""}</p>}
+        {error && <p className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">{error}</p>}
       </div>
     </div>
   );
