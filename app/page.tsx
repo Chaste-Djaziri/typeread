@@ -69,43 +69,55 @@ export default function CatalogPage() {
 
   return (
     <div className="min-h-screen bg-white text-slate-900 flex flex-col selection:bg-cyan-100 selection:text-cyan-900">
-      {/* 1. TOP HEADER */}
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-white/90 border-b border-slate-200">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-3">
-            <img
-              src="/typeread-logo.png"
-              alt="TypeRead logo"
-              className="h-14 sm:h-16 w-auto object-contain"
-            />
-            <span className="hidden sm:inline text-xs text-slate-500">Read by Typing</span>
-          </Link>
-
-          <nav className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/"
-              className="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-cyan-50 text-cyan-700 border border-cyan-200"
-            >
-              Book Catalog
+      {/* 1. PROFESSIONAL HEADER */}
+      <header className="sticky top-0 z-30 bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80 border-b border-slate-200 shadow-[0_1px_3px_rgba(0,0,0,0.05)]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-[72px] flex items-center justify-between gap-6">
+          {/* Left: Brand + Primary Nav */}
+          <div className="flex items-center gap-8">
+            <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
+              <img src="/typeread-logo.png" alt="TypeRead" className="h-11 sm:h-12 w-auto object-contain" />
             </Link>
+            <nav className="hidden md:flex items-center gap-1" aria-label="Primary navigation">
+              <Link href="/" aria-current="page" className="px-4 py-2 rounded-full text-sm font-semibold bg-slate-900 text-white shadow-sm">
+                Catalog
+              </Link>
+              <Link href="/books" className="px-4 py-2 rounded-full text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors">
+                My Books
+              </Link>
+              <Link href="/settings" className="px-4 py-2 rounded-full text-sm font-medium text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors">
+                Settings
+              </Link>
+            </nav>
+          </div>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2.5">
             <button
               type="button"
               onClick={() => setShowUpload(true)}
-              className="px-3.5 py-1.5 rounded-full text-xs font-medium bg-cyan-500 hover:bg-cyan-600 text-white transition-colors flex items-center gap-1 shadow-sm"
+              className="inline-flex items-center gap-1.5 px-5 py-2.5 rounded-full text-sm font-semibold bg-slate-900 hover:bg-black text-white shadow-sm hover:shadow transition-all"
             >
-              <span>+</span> Upload Book
+              <span className="text-base leading-none">+</span> Upload Book
             </button>
             <Link
               href="/settings"
-              className="p-2 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-slate-700 transition-colors shadow-sm"
+              className="hidden sm:inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-600 hover:text-slate-900 transition-colors"
               title="Settings"
+              aria-label="Settings"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
                 <circle cx="12" cy="12" r="3" />
                 <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 9 15a1.65 1.65 0 0 0-1-1.51V13a1.65 1.65 0 0 0 1-1.51A1.65 1.65 0 0 0 9 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 13.5 4a1.65 1.65 0 0 0 1 1.51V6a2 2 0 0 1 4 0v.49a1.65 1.65 0 0 0 1 1.51c.6.26 1.3.1 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1 1.51V13a1.65 1.65 0 0 0-1 1.51Z" />
               </svg>
             </Link>
-          </nav>
+            {/* Mobile quick link to library */}
+            <Link href="/books" className="md:hidden inline-flex items-center justify-center w-9 h-9 rounded-full border border-slate-200 bg-white text-slate-600" aria-label="My Books">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+            </Link>
+          </div>
         </div>
       </header>
 
