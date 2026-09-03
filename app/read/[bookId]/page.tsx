@@ -27,14 +27,14 @@ export default function ReadPage({
 
   if (!book) {
     return (
-      <div className="min-h-screen bg-[#0e1118] text-white flex flex-col items-center justify-center p-6 text-center space-y-4">
+      <div className="min-h-screen bg-white text-slate-900 flex flex-col items-center justify-center p-6 text-center space-y-4">
         <h1 className="text-2xl font-bold">Book Not Found</h1>
-        <p className="text-zinc-400 max-w-md">
+        <p className="text-slate-600 max-w-md">
           The requested book could not be found in your library.
         </p>
         <Link
           href="/"
-          className="px-5 py-2.5 rounded-full bg-cyan-500 text-black font-semibold hover:bg-cyan-400 transition-colors text-sm"
+          className="px-5 py-2.5 rounded-full bg-cyan-500 text-white font-semibold hover:bg-cyan-600 transition-colors text-sm shadow-sm"
         >
           ← Back to Book Catalog
         </Link>
@@ -43,7 +43,7 @@ export default function ReadPage({
   }
 
   return (
-    <div className="flex-1 flex flex-col bg-[#0e1118] min-h-screen">
+    <div className="flex-1 flex flex-col bg-white min-h-screen">
       <ReaderView
         key={book.id}
         book={book}
