@@ -459,17 +459,17 @@ export function ReaderView({
       tabIndex={0}
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}
-      className="outline-none min-h-screen flex flex-col bg-[#0e1118] text-[#e6edf3] select-none selection:bg-cyan-500/30 selection:text-white relative"
+      className="outline-none min-h-screen flex flex-col bg-white text-slate-900 select-none selection:bg-cyan-100 selection:text-cyan-900 relative"
       aria-label="Book reader and touch typing practice"
     >
       {/* 1. TOP BAR matching the screenshot */}
-      <header className="sticky top-0 z-30 backdrop-blur-md bg-[#0e1118]/90 border-b border-[#1c2333]">
+      <header className="sticky top-0 z-30 backdrop-blur-md bg-white/90 border-b border-slate-200 shadow-sm">
         <div className="w-full px-4 sm:px-8 h-12 flex items-center justify-between gap-2">
           {/* Breadcrumb: Catalog Link + Book Title / Chapter Title */}
           <div className="flex items-center gap-2 sm:gap-2.5 overflow-hidden text-xs sm:text-sm">
             <Link
               href="/"
-              className="px-2.5 py-1 rounded-full bg-[#161a25] hover:bg-[#202738] text-zinc-300 hover:text-white border border-[#262e40] text-[11px] sm:text-xs font-medium flex items-center gap-1.5 transition-colors shrink-0"
+              className="px-2.5 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-slate-900 border border-slate-200 text-[11px] sm:text-xs font-medium flex items-center gap-1.5 transition-colors shrink-0"
               title="Return to Book Catalog"
             >
               <span>←</span>
@@ -477,13 +477,13 @@ export function ReaderView({
             </Link>
             <button
               onClick={() => setShowBookModal(true)}
-              className="text-cyan-400 italic hover:text-cyan-300 transition-colors truncate font-medium cursor-pointer"
+              className="text-cyan-600 italic hover:text-cyan-700 transition-colors truncate font-medium cursor-pointer"
               title="Click to switch book"
             >
               {book.title}
             </button>
-            <span className="text-zinc-600 italic">/</span>
-            <span className="text-zinc-300 font-medium truncate">
+            <span className="text-slate-400 italic">/</span>
+            <span className="text-slate-700 font-medium truncate">
               {currentChapter?.title ?? `Chapter ${currentChapterIdx + 1}`}
             </span>
           </div>
@@ -494,27 +494,27 @@ export function ReaderView({
             <span
               className={`px-2.5 py-0.5 rounded text-[10px] sm:text-[11px] font-bold tracking-wider uppercase border transition-colors ${
                 statusLabel === "PAUSED"
-                  ? "bg-[#251b0f] text-[#f59e0b] border-[#92400e]/80"
+                  ? "bg-amber-50 text-amber-700 border-amber-200"
                   : statusLabel === "TYPING"
-                  ? "bg-[#0c2918] text-emerald-400 border-emerald-600/80 animate-pulse"
-                  : "bg-[#112433] text-cyan-400 border-cyan-600/80"
+                  ? "bg-emerald-50 text-emerald-700 border-emerald-300 animate-pulse"
+                  : "bg-cyan-50 text-cyan-700 border-cyan-200"
               }`}
             >
               {statusLabel}
             </span>
 
             {/* % Done pill */}
-            <span className="px-2.5 py-0.5 rounded text-[11px] font-mono bg-[#161a25] text-zinc-300 border border-[#252c3e]">
+            <span className="px-2.5 py-0.5 rounded text-[11px] font-mono bg-slate-100 text-slate-600 border border-slate-200">
               {progressPercent}% done
             </span>
 
             {/* WPM pill */}
-            <span className="px-2.5 py-0.5 rounded text-[11px] font-mono bg-[#161a25] text-zinc-300 border border-[#252c3e]">
+            <span className="px-2.5 py-0.5 rounded text-[11px] font-mono bg-slate-100 text-slate-600 border border-slate-200">
               {displayWpm} wpm
             </span>
 
             {/* Acc pill */}
-            <span className="px-2.5 py-0.5 rounded text-[11px] font-mono bg-[#161a25] text-zinc-300 border border-[#252c3e]">
+            <span className="px-2.5 py-0.5 rounded text-[11px] font-mono bg-slate-100 text-slate-600 border border-slate-200">
               {displayAcc}
               {typeof displayAcc === "number" ? "%" : ""} acc
             </span>
@@ -525,9 +525,9 @@ export function ReaderView({
         </div>
 
         {/* Thin glowing progress line across the top edge */}
-        <div className="h-[2px] w-full bg-[#181f2f] overflow-hidden">
+        <div className="h-[2px] w-full bg-slate-200 overflow-hidden">
           <div
-            className="h-full bg-gradient-to-r from-teal-400 via-cyan-400 to-indigo-500 shadow-[0_0_8px_rgba(45,212,191,0.7)] transition-all duration-300"
+            className="h-full bg-gradient-to-r from-teal-400 via-cyan-500 to-indigo-500 transition-all duration-300"
             style={{ width: `${progressPercent}%` }}
           />
         </div>
@@ -544,8 +544,8 @@ export function ReaderView({
             title={soundEnabled ? "Mechanical sound click enabled (click to mute)" : "Sound muted (click to enable)"}
             className={`p-2 rounded-xl border transition-all ${
               soundEnabled
-                ? "bg-[#102a1d] text-emerald-400 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
-                : "bg-[#151924] text-zinc-500 border-[#242c3d] hover:text-zinc-300"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-300 shadow-sm"
+                : "bg-white text-slate-400 border-slate-200 hover:text-slate-600 shadow-sm"
             }`}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -566,8 +566,8 @@ export function ReaderView({
             title={showKeyboard ? "Hide on-screen keyboard" : "Show on-screen keyboard"}
             className={`p-2 rounded-xl border transition-all ${
               showKeyboard
-                ? "bg-[#102a1d] text-emerald-400 border-emerald-500/50 shadow-[0_0_10px_rgba(16,185,129,0.3)]"
-                : "bg-[#151924] text-zinc-500 border-[#242c3d] hover:text-zinc-300"
+                ? "bg-emerald-50 text-emerald-700 border-emerald-300 shadow-sm"
+                : "bg-white text-slate-400 border-slate-200 hover:text-slate-600 shadow-sm"
             }`}
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -587,7 +587,7 @@ export function ReaderView({
             type="button"
             onClick={() => soundEngine.playKey(" ")}
             title="Test mechanical keypress click"
-            className="p-2 rounded-xl border bg-[#151924] text-zinc-400 border-[#242c3d] hover:text-cyan-300 hover:border-cyan-500/40 transition-all"
+            className="p-2 rounded-xl border bg-white text-slate-400 border-slate-200 hover:text-cyan-600 hover:border-cyan-300 shadow-sm transition-all"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
@@ -600,7 +600,7 @@ export function ReaderView({
             type="button"
             onClick={() => setShowStatsModal(true)}
             title="View typing performance stats"
-            className="p-2 rounded-xl border bg-[#151924] text-amber-400/80 border-[#242c3d] hover:text-amber-300 hover:border-amber-500/40 transition-all"
+            className="p-2 rounded-xl border bg-white text-amber-600 border-slate-200 hover:text-amber-700 hover:border-amber-300 shadow-sm transition-all"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <path d="M2 4l3 12h14l3-12-6 7-4-7-4 7-6-7zm3 16h14v2H5z" />
@@ -612,7 +612,7 @@ export function ReaderView({
             type="button"
             onClick={() => setShowHelpModal(true)}
             title="Keyboard shortcuts & instructions"
-            className="p-2 rounded-xl border bg-[#151924] text-zinc-400 border-[#242c3d] hover:text-cyan-300 hover:border-cyan-500/40 transition-all"
+            className="p-2 rounded-xl border bg-white text-slate-400 border-slate-200 hover:text-cyan-600 hover:border-cyan-300 shadow-sm transition-all"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
               <circle cx="12" cy="12" r="10" />
@@ -629,18 +629,18 @@ export function ReaderView({
             <button
               onClick={() => goToChapter(currentChapterIdx - 1)}
               disabled={currentChapterIdx <= 0}
-              className="px-2.5 py-1 text-xs text-zinc-500 hover:text-cyan-300 disabled:opacity-20 disabled:pointer-events-none transition-colors"
+              className="px-2.5 py-1 text-xs text-slate-500 hover:text-cyan-600 disabled:opacity-20 disabled:pointer-events-none transition-colors"
               title="Previous chapter"
             >
               ← Prev
             </button>
-            <h1 className="text-sm sm:text-base font-medium tracking-wide text-zinc-400">
+            <h1 className="text-sm sm:text-base font-medium tracking-wide text-slate-500">
               {currentChapter?.title ?? "Chapter"}
             </h1>
             <button
               onClick={() => goToChapter(currentChapterIdx + 1)}
               disabled={currentChapterIdx >= book.chapters.length - 1}
-              className="px-2.5 py-1 text-xs text-zinc-500 hover:text-cyan-300 disabled:opacity-20 disabled:pointer-events-none transition-colors"
+              className="px-2.5 py-1 text-xs text-slate-500 hover:text-cyan-600 disabled:opacity-20 disabled:pointer-events-none transition-colors"
               title="Next chapter"
             >
               Next →
@@ -678,15 +678,15 @@ export function ReaderView({
                   {/* Left Gutter: Stats (e.g. Ω 37 97) matching reference */}
                   <div className="w-16 sm:w-24 shrink-0 text-right pr-3 sm:pr-5 flex items-center justify-end gap-1.5 font-mono text-[11px] sm:text-xs pt-1 select-none">
                     {pStat && pStat.mode === "typed" ? (
-                      <span className="inline-flex items-center gap-1.5 text-cyan-400/90 font-medium">
-                        <span className="text-zinc-500 font-serif text-[11px]">Ω</span>
+                      <span className="inline-flex items-center gap-1.5 text-cyan-600 font-medium">
+                        <span className="text-slate-400 font-serif text-[11px]">Ω</span>
                         <span>{pStat.wpm}</span>
-                        <span className="text-zinc-400 font-normal">{pStat.accuracy}</span>
+                        <span className="text-slate-500 font-normal">{pStat.accuracy}</span>
                       </span>
                     ) : pStat?.mode === "read" || pStat?.mode === "skipped" ? (
-                      <span className="text-zinc-500 text-[10px]">✓</span>
+                      <span className="text-emerald-600 text-[10px]">✓</span>
                     ) : isActivePara ? (
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400 shadow-[0_0_6px_#22d3ee] animate-ping" />
+                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-500 shadow-[0_0_6px_rgba(6,182,212,0.4)] animate-ping" />
                     ) : null}
                   </div>
 
@@ -709,18 +709,18 @@ export function ReaderView({
                           const state = typingState.display[cIdx];
                           const isCursor = cIdx === typingState.cursor;
 
-                          let charClass = "text-[#8d9ab5]"; // pending character color
+                          let charClass = "text-slate-400"; // pending character color
                           if (state === "correct" || state === "corrected" || state === "foreign") {
-                            charClass = "text-[#ffffff] font-medium"; // typed correctly
+                            charClass = "text-slate-900 font-medium"; // typed correctly
                           } else if (state === "incorrect") {
                             charClass =
-                              "text-red-400 bg-red-950/60 underline decoration-red-500 decoration-2"; // typo
+                              "text-red-600 bg-red-50 underline decoration-red-500 decoration-2"; // typo
                           }
 
                           return (
                             <span key={cIdx} className="relative inline">
                               {isCursor && (
-                                <span className="inline-block w-[2px] sm:w-[2.5px] h-[1.15em] bg-[#f59e0b] shadow-[0_0_8px_#f59e0b] align-[-0.15em] mr-[-2px] animate-caret z-10" />
+                                <span className="inline-block w-[2px] sm:w-[2.5px] h-[1.15em] bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)] align-[-0.15em] mr-[-2px] animate-caret z-10" />
                               )}
                               <span className={charClass}>{char}</span>
                             </span>
@@ -729,15 +729,15 @@ export function ReaderView({
 
                         {/* Cursor at the end of text */}
                         {typingState.cursor === typingState.chars.length && (
-                          <span className="inline-block w-[2px] sm:w-[2.5px] h-[1.15em] bg-[#f59e0b] shadow-[0_0_8px_#f59e0b] align-[-0.15em] ml-[1px] animate-caret z-10" />
+                          <span className="inline-block w-[2px] sm:w-[2.5px] h-[1.15em] bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.6)] align-[-0.15em] ml-[1px] animate-caret z-10" />
                         )}
 
                         {/* Return symbol ↵ at end of active paragraph */}
                         <span
                           className={`ml-1 text-sm font-sans transition-colors ${
                             typingState.completed
-                              ? "text-cyan-400 font-bold animate-pulse"
-                              : "text-zinc-600"
+                              ? "text-cyan-600 font-bold animate-pulse"
+                              : "text-slate-400"
                           }`}
                           title="Press Enter to finish paragraph"
                         >
@@ -750,17 +750,17 @@ export function ReaderView({
                         <span
                           className={
                             isCompletedPara
-                              ? "text-[#d6dfed]"
+                              ? "text-slate-700"
                               : isActivePara
-                              ? "text-white font-medium"
-                              : "text-[#58647c]"
+                              ? "text-slate-900 font-medium"
+                              : "text-slate-400"
                           }
                         >
                           {paraText}
                         </span>
 
                         {/* Return symbol ↵ at end of paragraph */}
-                        <span className="ml-1 text-sm font-sans text-zinc-600">
+                        <span className="ml-1 text-sm font-sans text-slate-400">
                           ↵
                         </span>
                       </div>
@@ -786,43 +786,43 @@ export function ReaderView({
 
       {/* MODAL 1: STATS DRAWER / MODAL */}
       {showStatsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-[#141824] border border-[#232a3b] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-5">
-            <div className="flex items-center justify-between border-b border-[#232a3b] pb-3">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-5">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                 <span>🏆</span> Typing Statistics
               </h2>
               <button
                 onClick={() => setShowStatsModal(false)}
-                className="text-zinc-400 hover:text-white text-sm"
+                className="text-slate-400 hover:text-slate-700 text-sm"
               >
                 ✕
               </button>
             </div>
             <div className="grid grid-cols-2 gap-3 font-mono text-center">
-              <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47]">
-                <p className="text-xs text-zinc-400">Average WPM</p>
-                <p className="text-2xl font-bold text-cyan-400 mt-1">{aggStats.avgWpm}</p>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <p className="text-xs text-slate-500">Average WPM</p>
+                <p className="text-2xl font-bold text-cyan-600 mt-1">{aggStats.avgWpm}</p>
               </div>
-              <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47]">
-                <p className="text-xs text-zinc-400">Accuracy</p>
-                <p className="text-2xl font-bold text-emerald-400 mt-1">{aggStats.avgAcc}%</p>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <p className="text-xs text-slate-500">Accuracy</p>
+                <p className="text-2xl font-bold text-emerald-600 mt-1">{aggStats.avgAcc}%</p>
               </div>
-              <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47]">
-                <p className="text-xs text-zinc-400">Completed</p>
-                <p className="text-2xl font-bold text-white mt-1">
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <p className="text-xs text-slate-500">Completed</p>
+                <p className="text-2xl font-bold text-slate-900 mt-1">
                   {completedCount} / {totalBookParagraphs}
                 </p>
               </div>
-              <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47]">
-                <p className="text-xs text-zinc-400">Progress</p>
-                <p className="text-2xl font-bold text-purple-400 mt-1">{progressPercent}%</p>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <p className="text-xs text-slate-500">Progress</p>
+                <p className="text-2xl font-bold text-violet-600 mt-1">{progressPercent}%</p>
               </div>
             </div>
             <div className="flex justify-end pt-2">
               <button
                 onClick={() => setShowStatsModal(false)}
-                className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-medium rounded-full text-xs"
+                className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white font-medium rounded-full text-xs"
               >
                 Done
               </button>
@@ -833,45 +833,45 @@ export function ReaderView({
 
       {/* MODAL 2: HELP / SHORTCUTS MODAL */}
       {showHelpModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-[#141824] border border-[#232a3b] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#232a3b] pb-3">
-              <h2 className="text-lg font-semibold text-white flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
                 <span>💡</span> Keyboard Shortcuts
               </h2>
               <button
                 onClick={() => setShowHelpModal(false)}
-                className="text-zinc-400 hover:text-white text-sm"
+                className="text-slate-400 hover:text-slate-700 text-sm"
               >
                 ✕
               </button>
             </div>
-            <ul className="space-y-2.5 text-sm text-zinc-300">
+            <ul className="space-y-2.5 text-sm text-slate-700">
               <li className="flex items-center justify-between">
                 <span>Finish paragraph & advance</span>
-                <kbd className="px-2 py-1 bg-[#232a3b] rounded text-xs font-mono text-cyan-300">Enter</kbd>
+                <kbd className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-xs font-mono text-cyan-700">Enter</kbd>
               </li>
               <li className="flex items-center justify-between">
                 <span>Restart current paragraph</span>
-                <kbd className="px-2 py-1 bg-[#232a3b] rounded text-xs font-mono text-cyan-300">Tab</kbd>
+                <kbd className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-xs font-mono text-cyan-700">Tab</kbd>
               </li>
               <li className="flex items-center justify-between">
                 <span>Skip paragraph without typing</span>
-                <kbd className="px-2 py-1 bg-[#232a3b] rounded text-xs font-mono text-cyan-300">Shift + Enter</kbd>
+                <kbd className="px-2 py-1 bg-slate-100 border border-slate-200 rounded text-xs font-mono text-cyan-700">Shift + Enter</kbd>
               </li>
               <li className="flex items-center justify-between">
                 <span>Jump directly to any paragraph</span>
-                <span className="text-xs text-zinc-400">Click paragraph</span>
+                <span className="text-xs text-slate-500">Click paragraph</span>
               </li>
               <li className="flex items-center justify-between">
                 <span>Switch between Typing and Reading mode</span>
-                <span className="text-xs text-zinc-400">Top-right toggle</span>
+                <span className="text-xs text-slate-500">Top-right toggle</span>
               </li>
             </ul>
             <div className="flex justify-end pt-3">
               <button
                 onClick={() => setShowHelpModal(false)}
-                className="px-4 py-2 bg-cyan-500 hover:bg-cyan-400 text-black font-medium rounded-full text-xs"
+                className="px-4 py-2 bg-cyan-500 hover:bg-cyan-600 text-white font-medium rounded-full text-xs"
               >
                 Got it
               </button>
@@ -882,18 +882,18 @@ export function ReaderView({
 
       {/* MODAL 3: BOOK SWITCHER MODAL */}
       {showBookModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-          <div className="bg-[#141824] border border-[#232a3b] rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
-            <div className="flex items-center justify-between border-b border-[#232a3b] pb-3">
-              <h2 className="text-lg font-semibold text-white">Library</h2>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/20 backdrop-blur-sm">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 max-w-md w-full shadow-2xl space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-200 pb-3">
+              <h2 className="text-lg font-semibold text-slate-900">Library</h2>
               <button
                 onClick={() => setShowBookModal(false)}
-                className="text-zinc-400 hover:text-white text-sm"
+                className="text-slate-400 hover:text-slate-700 text-sm"
               >
                 ✕
               </button>
             </div>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-slate-500">
               Select a book to read or upload your own files (EPUB, PDF, TXT, MD).
             </p>
             <div className="flex flex-col gap-2 pt-2 max-h-60 overflow-y-auto">
@@ -905,8 +905,8 @@ export function ReaderView({
                 }}
                 className={`w-full text-left px-4 py-2.5 rounded-xl border text-sm transition-colors ${
                   book.id === "demo"
-                    ? "bg-[#1f283d] text-cyan-300 border-cyan-500/50"
-                    : "bg-[#1d2436] hover:bg-[#252e45] text-zinc-200 border-[#2d3852]"
+                    ? "bg-cyan-50 text-cyan-700 border-cyan-300"
+                    : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200"
                 }`}
               >
                 Welcome to TypeRead (Tutorial)
@@ -917,19 +917,19 @@ export function ReaderView({
                   onSwitchBook?.("upload");
                   setShowBookModal(false);
                 }}
-                className="w-full text-center px-4 py-2.5 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 text-sm font-medium transition-colors"
+                className="w-full text-center px-4 py-2.5 rounded-xl bg-cyan-50 hover:bg-cyan-100 text-cyan-700 border border-cyan-200 text-sm font-medium transition-colors"
               >
                 + Upload New Book
               </button>
               <Link
                 href="/books"
-                className="w-full text-center px-4 py-2.5 rounded-xl bg-[#1d2436] hover:bg-[#252e45] text-zinc-300 text-sm font-medium border border-[#2d3852] transition-colors"
+                className="w-full text-center px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-600 text-sm font-medium border border-slate-200 transition-colors"
               >
                 Manage All Books →
               </Link>
               <Link
                 href="/settings"
-                className="w-full text-center px-4 py-2.5 rounded-xl bg-[#1d2436] hover:bg-[#252e45] text-zinc-400 text-sm font-medium border border-[#2d3852] transition-colors"
+                className="w-full text-center px-4 py-2.5 rounded-xl bg-white hover:bg-slate-50 text-slate-500 text-sm font-medium border border-slate-200 transition-colors"
               >
                 Settings & Typography →
               </Link>
@@ -940,36 +940,36 @@ export function ReaderView({
 
       {/* MODAL 4: BOOK COMPLETED CELEBRATION MODAL */}
       {showCompletionModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
-          <div className="bg-[#141824] border border-cyan-500/40 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl text-center space-y-6 relative overflow-hidden">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-400 to-emerald-400 text-black flex items-center justify-center text-3xl mx-auto shadow-lg shadow-cyan-500/20">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/30 backdrop-blur-md">
+          <div className="bg-white border border-cyan-200 rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl text-center space-y-6 relative overflow-hidden">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-tr from-cyan-400 to-emerald-400 text-white flex items-center justify-center text-3xl mx-auto shadow-lg shadow-cyan-500/20">
               🎉
             </div>
             <div>
-              <span className="text-[11px] font-mono uppercase tracking-widest text-emerald-400 font-bold px-3 py-1 rounded-full bg-emerald-950/60 border border-emerald-700/50 inline-block mb-2">
+              <span className="text-[11px] font-mono uppercase tracking-widest text-emerald-700 font-bold px-3 py-1 rounded-full bg-emerald-50 border border-emerald-200 inline-block mb-2">
                 Book Finished!
               </span>
-              <h2 className="text-2xl font-bold text-white tracking-tight">
+              <h2 className="text-2xl font-bold text-slate-900 tracking-tight">
                 {book.title}
               </h2>
-              <p className="text-xs sm:text-sm text-zinc-400 mt-2">
+              <p className="text-xs sm:text-sm text-slate-600 mt-2">
                 Congratulations! You typed through all {book.chapters.length} chapter{book.chapters.length !== 1 ? "s" : ""} and completed the entire book.
               </p>
             </div>
 
             {/* Performance Stats */}
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 font-mono text-center pt-2">
-              <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47]">
-                <p className="text-[10px] uppercase text-zinc-500">Average WPM</p>
-                <p className="text-2xl font-bold text-cyan-400 mt-0.5">{aggStats.avgWpm || liveMetrics.wpm || "-"}</p>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <p className="text-[10px] uppercase text-slate-500">Average WPM</p>
+                <p className="text-2xl font-bold text-cyan-600 mt-0.5">{aggStats.avgWpm || liveMetrics.wpm || "-"}</p>
               </div>
-              <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47]">
-                <p className="text-[10px] uppercase text-zinc-500">Accuracy</p>
-                <p className="text-2xl font-bold text-emerald-400 mt-0.5">{aggStats.avgAcc}%</p>
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                <p className="text-[10px] uppercase text-slate-500">Accuracy</p>
+                <p className="text-2xl font-bold text-emerald-600 mt-0.5">{aggStats.avgAcc}%</p>
               </div>
               <div className="p-3 bg-[#191f30] rounded-xl border border-[#252f47] col-span-2 sm:col-span-1">
-                <p className="text-[10px] uppercase text-zinc-500">Paragraphs</p>
-                <p className="text-2xl font-bold text-white mt-0.5">{totalBookParagraphs}</p>
+                <p className="text-[10px] uppercase text-slate-500">Paragraphs</p>
+                <p className="text-2xl font-bold text-slate-900 mt-0.5">{totalBookParagraphs}</p>
               </div>
             </div>
 
@@ -977,14 +977,14 @@ export function ReaderView({
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
               <Link
                 href="/"
-                className="w-full sm:w-auto flex-1 px-6 py-3 rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400 hover:from-cyan-300 hover:to-emerald-300 text-black font-bold text-sm transition-all shadow-lg shadow-cyan-500/20"
+                className="w-full sm:w-auto flex-1 px-6 py-3 rounded-full bg-gradient-to-r from-cyan-500 to-emerald-500 hover:from-cyan-600 hover:to-emerald-600 text-white font-bold text-sm transition-all shadow-md"
               >
                 Find Other Books in Catalog →
               </Link>
               <button
                 type="button"
                 onClick={() => setShowCompletionModal(false)}
-                className="w-full sm:w-auto px-4 py-3 rounded-full border border-[#2d3852] text-zinc-400 hover:text-white text-xs font-medium transition-colors"
+                className="w-full sm:w-auto px-4 py-3 rounded-full border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 text-xs font-medium transition-colors"
               >
                 Stay Here
               </button>
