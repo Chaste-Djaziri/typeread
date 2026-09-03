@@ -76,7 +76,7 @@ export default function CatalogPage() {
             <img
               src="/typeread-logo.png"
               alt="TypeRead logo"
-              className="h-8 w-auto object-contain"
+              className="h-11 sm:h-12 w-auto object-contain"
             />
             <span className="hidden sm:inline text-xs text-slate-500">Read by Typing</span>
           </Link>
