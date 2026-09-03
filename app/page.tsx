@@ -122,44 +122,137 @@ export default function CatalogPage() {
       </header>
 
       {/* 2. MAIN CONTENT */}
-      <main className="max-w-6xl mx-auto w-full px-4 sm:px-6 py-8 flex-1">
-        {/* Banner / Overview */}
-        <section className="rounded-3xl border border-slate-200 bg-gradient-to-br from-white via-slate-50 to-white p-6 sm:p-8 mb-8 shadow-sm relative overflow-hidden">
-          <div className="absolute right-0 top-0 w-96 h-96 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="relative z-10 max-w-2xl">
-            <span className="inline-block text-[11px] font-mono uppercase tracking-widest text-cyan-700 font-semibold px-2.5 py-1 rounded-full bg-cyan-50 border border-cyan-200 mb-3">
-              Library & Reading Catalog
-            </span>
-            <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight leading-tight">
-              Type your way through stories, articles, and books.
-            </h1>
-            <p className="text-sm text-slate-600 mt-2 leading-relaxed">
-              Choose any book below to enter the full-screen typing interface with mechanical click sound feedback and live guidance.
-            </p>
-          </div>
+      <main className="flex-1 flex flex-col">
+        {/* HERO SECTION */}
+        <section className="relative overflow-hidden bg-white border-b border-slate-200">
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-cyan-50 via-white to-white" />
+          <div className="absolute inset-0 -z-10 bg-[linear-gradient(to_right,#f1f5f9_1px,transparent_1px),linear-gradient(to_bottom,#f1f5f9_1px,transparent_1px)] bg-[size:32px_32px] opacity-40" aria-hidden="true" />
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 lg:py-20">
+            <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
+              <div>
+                <span className="inline-flex items-center gap-2 text-xs font-semibold tracking-widest uppercase text-cyan-700 bg-cyan-50 border border-cyan-200 px-3 py-1.5 rounded-full">
+                  <span className="w-2 h-2 rounded-full bg-cyan-500 animate-pulse" aria-hidden="true" />
+                  Read by Typing
+                </span>
+                <h1 className="mt-4 text-4xl sm:text-5xl font-extrabold tracking-tight text-slate-900 leading-[1.05]">
+                  Type your way
+                  <br className="hidden sm:block" />
+                  <span className="bg-gradient-to-r from-cyan-600 to-violet-600 bg-clip-text text-transparent">through stories.</span>
+                </h1>
+                <p className="mt-4 text-base sm:text-lg text-slate-600 leading-relaxed max-w-xl">
+                  Turn any EPUB, PDF or TXT into a focused typing workout. Type paragraph by paragraph with live WPM, accuracy and mechanical sound feedback — progress is saved automatically.
+                </p>
+                <div className="mt-8 flex flex-wrap gap-3">
+                  <Link
+                    href={books[0] ? `/read/${books[0].id}` : "/books"}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-slate-900 hover:bg-black text-white text-sm font-semibold shadow-sm hover:shadow transition-all"
+                  >
+                    Start Typing <span aria-hidden="true">→</span>
+                  </Link>
+                  <button
+                    type="button"
+                    onClick={() => setShowUpload(true)}
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white hover:bg-slate-50 text-slate-900 text-sm font-semibold border border-slate-200 shadow-sm transition-colors"
+                  >
+                    Upload Book
+                  </button>
+                  <Link
+                    href="/books"
+                    className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-cyan-50 hover:bg-cyan-100 text-cyan-700 text-sm font-semibold border border-cyan-200 transition-colors"
+                  >
+                    Browse Library
+                  </Link>
+                </div>
+                <div className="mt-8 flex flex-wrap items-center gap-6 text-sm">
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-700 text-xs">✓</span>
+                    <span className="text-slate-600">
+                      <span className="font-semibold text-slate-900">{stats.completedBooks}</span> books completed
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-cyan-50 border border-cyan-200 text-cyan-700 font-mono text-xs">Ω</span>
+                    <span className="text-slate-600">
+                      <span className="font-semibold text-slate-900">{stats.avgWpm || "—"}</span> avg WPM
+                    </span>
+                  </div>
+                  <div className="hidden sm:flex items-center gap-2 text-xs text-slate-500">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true" />
+                    {stats.completedParagraphs}/{stats.totalParagraphs} paragraphs typed
+                  </div>
+                </div>
+              </div>
 
-          {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-slate-200 font-mono text-center">
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-              <p className="text-[11px] text-slate-500">Books Available</p>
-              <p className="text-xl font-bold text-slate-900 mt-0.5">{books.length}</p>
-            </div>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-              <p className="text-[11px] text-slate-500">Completed Books</p>
-              <p className="text-xl font-bold text-emerald-600 mt-0.5">{stats.completedBooks}</p>
-            </div>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-              <p className="text-[11px] text-slate-500">Paragraphs Typed</p>
-              <p className="text-xl font-bold text-cyan-600 mt-0.5">
-                {stats.completedParagraphs} <span className="text-xs font-normal text-slate-500">/ {stats.totalParagraphs}</span>
-              </p>
-            </div>
-            <div className="p-3 bg-slate-50 rounded-xl border border-slate-200">
-              <p className="text-[11px] text-slate-500">Overall Avg WPM</p>
-              <p className="text-xl font-bold text-violet-600 mt-0.5">{stats.avgWpm || "-"}</p>
+              {/* Visual mock */}
+              <div className="relative">
+                <div className="relative rounded-[2rem] border border-slate-200 bg-white shadow-xl overflow-hidden">
+                  <div className="h-10 bg-slate-50 border-b border-slate-200 flex items-center gap-1.5 px-4">
+                    <span className="w-3 h-3 rounded-full bg-red-400" aria-hidden="true" />
+                    <span className="w-3 h-3 rounded-full bg-yellow-400" aria-hidden="true" />
+                    <span className="w-3 h-3 rounded-full bg-green-400" aria-hidden="true" />
+                    <span className="ml-3 text-xs font-mono text-slate-500">chapter_01.txt — typing mode</span>
+                  </div>
+                  <div className="p-6 sm:p-8 space-y-4">
+                    <div className="space-y-2">
+                      <div className="h-2.5 bg-slate-900 rounded-full w-3/4" />
+                      <div className="h-2.5 bg-slate-200 rounded-full w-full" />
+                      <div className="h-2.5 bg-slate-200 rounded-full w-5/6" />
+                      <div className="h-2.5 bg-emerald-500 rounded-full w-2/3" />
+                    </div>
+                    <div className="grid grid-cols-3 gap-3 pt-4">
+                      <div className="rounded-xl bg-slate-900 text-white p-3 text-center">
+                        <p className="text-[11px] uppercase tracking-widest text-slate-400">WPM</p>
+                        <p className="text-xl font-bold">{stats.avgWpm || 42}</p>
+                      </div>
+                      <div className="rounded-xl bg-cyan-500 text-white p-3 text-center">
+                        <p className="text-[11px] uppercase tracking-widest text-cyan-100">Accuracy</p>
+                        <p className="text-xl font-bold">98%</p>
+                      </div>
+                      <div className="rounded-xl bg-white border border-slate-200 p-3 text-center">
+                        <p className="text-[11px] uppercase tracking-widest text-slate-500">Progress</p>
+                        <p className="text-xl font-bold text-slate-900">{books.length} books</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-between pt-2 text-xs font-mono text-slate-500">
+                      <span>Press Enter ↵ to continue</span>
+                      <span className="px-2 py-1 rounded-full bg-amber-50 border border-amber-200 text-amber-700">TYPING</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="absolute -z-10 top-6 -right-6 w-full h-full rounded-[2rem] bg-gradient-to-br from-cyan-100 to-violet-100 border border-slate-200" aria-hidden="true" />
+              </div>
             </div>
           </div>
         </section>
+
+        {/* FEATURES STRIP */}
+        <section className="bg-slate-50 border-b border-slate-200">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid sm:grid-cols-3 gap-4">
+            <div className="flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+              <span className="shrink-0 w-10 h-10 rounded-xl bg-cyan-50 border border-cyan-200 flex items-center justify-center text-cyan-700">⌨️</span>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Any Book, Any Format</h3>
+                <p className="text-xs text-slate-600 mt-1">EPUB, PDF, TXT or Markdown — stays 100% local on your device.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+              <span className="shrink-0 w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">◐</span>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Live Feedback</h3>
+                <p className="text-xs text-slate-600 mt-1">Mechanical clicks, visual keyboard and per-paragraph WPM & accuracy.</p>
+              </div>
+            </div>
+            <div className="flex items-start gap-3 p-4 rounded-2xl bg-white border border-slate-200 shadow-sm">
+              <span className="shrink-0 w-10 h-10 rounded-xl bg-violet-50 border border-violet-200 flex items-center justify-center text-violet-700">≡</span>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900">Track Progress</h3>
+                <p className="text-xs text-slate-600 mt-1">Chapter and book stats, streaks and fastest paragraphs — all saved locally.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
 
         {/* Catalog Grid Header */}
         <div className="flex items-center justify-between mb-4">
